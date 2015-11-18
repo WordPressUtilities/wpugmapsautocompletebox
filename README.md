@@ -17,6 +17,9 @@ function set_wpugmapsautocompletebox_apilang() {
     return 'fr';
 }
 
+// Add built-in lat / lng post metas
+add_filter('wpugmapsautocompletebox_addlatlng', '__return_true', 10, 1);
+
 // Post types
 add_filter( 'wpugmapsautocompletebox_posttypes', 'set_wpugmapsautocompletebox_posttypes', 10, 3 );
 function set_wpugmapsautocompletebox_posttypes($post_types) {
@@ -25,9 +28,9 @@ function set_wpugmapsautocompletebox_posttypes($post_types) {
 }
 ```
 
-## How to add an event :
+## How to add a JS event :
 
-Put the code below in your preferred JS file.
+Put the code below in your favorite JS file.
 
 ```js
 jQuery(window).on('wpugmapsautocompletebox_newcoords',function(e,lat,lng){
@@ -35,8 +38,14 @@ jQuery(window).on('wpugmapsautocompletebox_newcoords',function(e,lat,lng){
 });
 ```
 
+## How to retrieve dimension values
+
+```php
+$lat = get_post_meta(get_the_ID(),'wpugmapsabox_lat',1);
+$lng = get_post_meta(get_the_ID(),'wpugmapsabox_lng',1);
+```
+
 ## TODO
 
 * Translation.
-* Optional boxes for lat & lng.
 * WPU Option for API Key.

@@ -2,6 +2,9 @@ jQuery(document).ready(function() {
     var input = document.getElementById('wpugmapsabox-content');
     if (!input || !google) return;
     var autocomplete = new google.maps.places.Autocomplete(input);
+    var $lat = jQuery('#wpugmapsabox-lat');
+    var $lng = jQuery('#wpugmapsabox-lng');
+
     // Prevent ENTER
     jQuery(input).keypress(function(e) {
         if (e.which == 13) e.preventDefault();
@@ -13,6 +16,12 @@ jQuery(document).ready(function() {
             var lat = place.geometry.location.lat();
             var lng = place.geometry.location.lng();
             jQuery(window).trigger('wpugmapsautocompletebox_newcoords', [lat, lng]);
+            if ($lat) {
+                $lat.val(lat);
+            }
+            if ($lng) {
+                $lng.val(lng);
+            }
         }
     });
 });
