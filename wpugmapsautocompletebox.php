@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.2
+Version: 0.2.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -23,6 +23,7 @@ class WPUGMapsAutocompleteBox {
     }
 
     function wp_loaded() {
+        load_plugin_textdomain('wpugmapsabox', false, dirname(plugin_basename(__FILE__)) . '/lang/');
 
         $locale = explode('_', get_locale());
         $this->mainlang = apply_filters('wpugmapsautocompletebox_apilang', $locale[0]);
@@ -51,7 +52,7 @@ class WPUGMapsAutocompleteBox {
         foreach ($this->post_types as $post_type_box) {
             add_meta_box('geocoding-metabox', __('Geocoding') , array(&$this,
                 'render_box_geocoding'
-            ) , 'post');
+            ) , $post_type_box);
         }
     }
 
@@ -73,14 +74,14 @@ class WPUGMapsAutocompleteBox {
 
         if ($this->addlatlng) {
             foreach ($this->dim as $id => $name) {
-
                 echo '<p><label for="wpugmapsabox-' . $id . '">' . $name . '</label><br />';
                 echo '<input id="wpugmapsabox-' . $id . '" type="text" name="wpugmapsabox_' . $id . '" value="' . get_post_meta($post_id, 'wpugmapsabox_' . $id, 1) . '" /></p>';
             }
         }
 
-        echo '<p><label for="wpugmapsabox-content">' . __('Please write an address below and click on a suggested result to update GPS coordinates', 'wpugmapsabox') . '</label><br />';
-        echo '<input id="wpugmapsabox-content" type="text" name="wpugmapsabox_geocoding" class="widefat" value="" /></p>';
+        echo '<p><label for="wpugmapsabox-content">' . __('Address', 'wpugmapsabox') . '</label><br />';
+        echo '<input id="wpugmapsabox-content" type="text" name="wpugmapsabox_geocoding" class="widefat" value="" /><br />';
+        echo '<small>' . __('Please write an address below and click on a suggested result to update GPS coordinates', 'wpugmapsabox') . '</small></p>';
     }
 
     function save_meta_box_data($post_id) {
