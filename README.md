@@ -33,8 +33,11 @@ function set_wpugmapsautocompletebox_posttypes($post_types) {
 Put the code below in your favorite JS file.
 
 ```js
-jQuery(window).on('wpugmapsautocompletebox_newcoords',function(e,lat,lng){
+jQuery(window).on('wpugmapsautocompletebox_newcoords',function(e,lat,lng,place){
+    // Coordinates
     console.log(lat,lng);
+    // Place object
+    console.log(place);
 });
 ```
 

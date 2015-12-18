@@ -1,0 +1,41 @@
+@charset "UTF-8";
+
+/* ----------------------------------------------------------
+  Simple preview grid
+---------------------------------------------------------- */
+
+.wpugmapsabox-grid {
+    overflow: hidden;
+}
+
+.wpugmapsabox-grid > * {
+    float: left;
+    width: 50%;
+}
+
+.wpugmapsabox-grid > * + * {
+    text-align: right;
+}
+
+.wpugmapsabox-grid + p {
+    margin-top: 0;
+}
+
+.wpugmapsabox-grid .map-preview {
+    padding-top: 20px;
+    opacity: 0.70;
+    -webkit-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+.wpugmapsabox-grid .map-preview:hover {
+    opacity: 0.99;
+}
+
+@media(max-width:1000px) {
+    .wpugmapsabox-grid > * {
+        float: none;
+        width: auto;
+        text-align: left;
+    }
+}
