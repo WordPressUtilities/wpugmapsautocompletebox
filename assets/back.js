@@ -40,9 +40,10 @@ jQuery(document).ready(function() {
                 $lng.val(lng);
             }
             if ($preview && lat && lng) {
+                var coords = lat + ',' + lng;
                 // Set preview img
-                var preview_img = $preview.attr('data-model').replace(/\{\{coordinates\}\}/g, lat + ',' + lng);
-                $preview.html('<img src="' + preview_img + '" alt="" />');
+                var preview_img = $preview.attr('data-model').replace(/\{\{coordinates\}\}/g, coords);
+                $preview.html('<a target="_blank" href="https://maps.google.com/?q=' + coords + '"><img src="' + preview_img + '" alt="" />');
             }
         }
     });

@@ -21,8 +21,14 @@
     margin-top: 0;
 }
 
-.wpugmapsabox-grid .map-preview {
+.wpugmapsabox-grid a[target] {
+    display: inline-block;
     padding-top: 20px;
+    line-height: 1;
+    vertical-align: top;
+}
+
+.wpugmapsabox-grid .map-preview {
     opacity: 0.70;
     -webkit-transition: all 0.3s ease;
     transition: all 0.3s ease;

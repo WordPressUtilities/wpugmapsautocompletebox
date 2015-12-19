@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.3
+Version: 0.3.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -12,6 +12,8 @@ License URI: http://opensource.org/licenses/MIT
 */
 
 class WPUGMapsAutocompleteBox {
+
+    public $version = '0.3.1';
 
     function __construct() {
         if (!is_admin()) {
@@ -58,11 +60,11 @@ class WPUGMapsAutocompleteBox {
     }
 
     function enqueue_scripts() {
-        wp_enqueue_script('wpugmapsabox-maps', 'https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=' . $this->frontapi_key . '&language=' . $this->mainlang . '&sensor=false', false, '3');
-        wp_enqueue_style('wpugmapsabox-backcss', plugins_url('/assets/back.css', __FILE__));
+        wp_enqueue_script('wpugmapsabox-maps', 'https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=' . $this->frontapi_key . '&language=' . $this->mainlang . '&sensor=false', false, '3.exp');
+        wp_enqueue_style('wpugmapsabox-backcss', plugins_url('/assets/back.css', __FILE__) , array() , $this->version);
         wp_enqueue_script('wpugmapsabox-back', plugins_url('/assets/back.js', __FILE__) , array(
             'jquery'
-        ));
+        ) , $this->version);
     }
 
     function render_box_geocoding() {
@@ -89,16 +91,23 @@ class WPUGMapsAutocompleteBox {
             echo '</div>';
         }
         $base_img = '';
+        $coords = '';
         if ($base_dim['lat'] || $base_dim['lng']) {
-            $base_img = str_replace('{{coordinates}}', $base_dim['lat'].','.$base_dim['lng'], $this->base_previewurl);
+            $coords = $base_dim['lat'] . ',' . $base_dim['lng'];
+            $base_img = str_replace('{{coordinates}}', $coords, $this->base_previewurl);
             $base_img = '<img src="' . $base_img . '" alt="" />';
         }
-        echo '<div data-model="' . $this->base_previewurl . '" class="map-preview" id="wpugmapsabox-preview">' . $base_img . '</div>';
+        echo '<div data-model="' . $this->base_previewurl . '" class="map-preview" id="wpugmapsabox-preview">';
+        if (!empty($base_img)) {
+            echo '<a target="_blank" href="https://maps.google.com/?q=' . $coords . '">' . $base_img . '</a>';
+        }
+        echo '</div>';
 
         echo '</div>';
 
+        $address_value = get_post_meta($post_id, 'wpugmapsabox_address', 1);
         echo '<p><label for="wpugmapsabox-content">' . __('Address', 'wpugmapsabox') . '</label><br />';
-        echo '<input id="wpugmapsabox-content" type="text" name="wpugmapsabox_geocoding" class="widefat" value="" /><br />';
+        echo '<input id="wpugmapsabox-content" type="text" name="wpugmapsabox_address" class="widefat" value="' . esc_attr($address_value) . '" /><br />';
         echo '<small>' . __('Please write an address below and click on a suggested result to update GPS coordinates', 'wpugmapsabox') . '</small></p>';
     }
 
@@ -120,6 +129,9 @@ class WPUGMapsAutocompleteBox {
             if (isset($_POST['wpugmapsabox_' . $id])) {
                 update_post_meta($post_id, 'wpugmapsabox_' . $id, sanitize_text_field($_POST['wpugmapsabox_' . $id]));
             }
+        }
+        if (isset($_POST['wpugmapsabox_address'])) {
+            update_post_meta($post_id, 'wpugmapsabox_address', sanitize_text_field($_POST['wpugmapsabox_address']));
         }
     }
 }
