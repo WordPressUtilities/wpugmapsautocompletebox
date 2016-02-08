@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.3.2
+Version: 0.3.2.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,13 +13,12 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.3.2';
+    public $version = '0.3.2.1';
 
     public function __construct() {
         if (!is_admin()) {
             return;
         }
-
         add_action('wp_loaded', array(&$this,
             'wp_loaded'
         ));
@@ -30,13 +29,6 @@ class WPUGMapsAutocompleteBox {
         $this->post_types = apply_filters('wpugmapsautocompletebox_posttypes', array(
             'post'
         ));
-        $currentScreen = get_current_screen();
-        if ($currentScreen->base != "post") {
-            return;
-        }
-        if (!in_array($currentScreen->post_type, $this->post_types)) {
-            return;
-        }
 
         load_plugin_textdomain('wpugmapsabox', false, dirname(plugin_basename(__FILE__)) . '/lang/');
 
@@ -71,7 +63,13 @@ class WPUGMapsAutocompleteBox {
     }
 
     public function enqueue_scripts() {
-
+        $currentScreen = get_current_screen();
+        if ($currentScreen->base != "post") {
+            return;
+        }
+        if (!in_array($currentScreen->post_type, $this->post_types)) {
+            return;
+        }
         wp_enqueue_script('wpugmapsabox-maps', 'https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=' . $this->frontapi_key . '&language=' . $this->mainlang . '&sensor=false', false, '3.exp', true);
         wp_enqueue_style('wpugmapsabox-backcss', plugins_url('/assets/back.css', __FILE__), array(), $this->version);
         wp_enqueue_script('wpugmapsabox-back', plugins_url('/assets/back.js', __FILE__), array(
