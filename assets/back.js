@@ -1,8 +1,8 @@
 /*global jQuery:false,google:false */
 
-'use strict';
 
 jQuery(document).ready(function() {
+    'use strict';
 
     var input = document.getElementById('wpugmapsabox-content');
     if (!input) {

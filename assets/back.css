@@ -13,7 +13,7 @@
     width: 50%;
 }
 
-.wpugmapsabox-grid > * + * {
+.wpugmapsabox-grid > *:not(.map-latlng--noform) + * {
     text-align: right;
 }
 

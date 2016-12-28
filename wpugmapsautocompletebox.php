@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.3.2.1
+Version: 0.4
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,7 +13,7 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.3.2.1';
+    public $version = '0.4';
 
     public function __construct() {
         if (!is_admin()) {
@@ -28,6 +28,9 @@ class WPUGMapsAutocompleteBox {
 
         $this->post_types = apply_filters('wpugmapsautocompletebox_posttypes', array(
             'post'
+        ));
+        $this->taxonomies = apply_filters('wpugmapsautocompletebox_taxonomies', array(
+            'category'
         ));
 
         load_plugin_textdomain('wpugmapsabox', false, dirname(plugin_basename(__FILE__)) . '/lang/');
@@ -46,30 +49,46 @@ class WPUGMapsAutocompleteBox {
         add_action('add_meta_boxes', array(&$this,
             'add_custom_meta_boxes'
         ));
+
+        foreach ($this->taxonomies as $taxonomy_box) {
+            add_action($taxonomy_box . '_edit_form_fields', array(&$this,
+                'add_taxo_meta_box'
+            ), 10, 2);
+            add_action('edited_' . $taxonomy_box, array(&$this,
+                'save_taxo_values'
+            ), 10, 2);
+
+        }
+
         add_action('admin_enqueue_scripts', array(&$this,
             'enqueue_scripts'
         ));
         add_action('save_post', array(&$this,
-            'save_meta_box_data'
+            'save_post_values'
         ));
     }
 
     public function add_custom_meta_boxes($post) {
         foreach ($this->post_types as $post_type_box) {
             add_meta_box('geocoding-metabox', __('Geocoding'), array(&$this,
-                'render_box_geocoding'
+                'add_posttype_meta_box'
             ), $post_type_box);
         }
     }
 
     public function enqueue_scripts() {
         $currentScreen = get_current_screen();
-        if ($currentScreen->base != "post") {
+
+        if ($currentScreen->base != "post" && $currentScreen->base != "term") {
             return;
         }
-        if (!in_array($currentScreen->post_type, $this->post_types)) {
+        if ($currentScreen->base == "post" && !in_array($currentScreen->post_type, $this->post_types)) {
             return;
         }
+        if ($currentScreen->base == "term" && !in_array($currentScreen->taxonomy, $this->taxonomies)) {
+            return;
+        }
+
         wp_enqueue_script('wpugmapsabox-maps', 'https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=' . $this->frontapi_key . '&language=' . $this->mainlang . '&sensor=false', false, '3.exp', true);
         wp_enqueue_style('wpugmapsabox-backcss', plugins_url('/assets/back.css', __FILE__), array(), $this->version);
         wp_enqueue_script('wpugmapsabox-back', plugins_url('/assets/back.js', __FILE__), array(
@@ -77,52 +96,178 @@ class WPUGMapsAutocompleteBox {
         ), $this->version, true);
     }
 
-    public function render_box_geocoding() {
+    /* ----------------------------------------------------------
+      Render boxes
+    ---------------------------------------------------------- */
+
+    /* TAXO */
+
+    public function add_taxo_meta_box($term, $taxonomy) {
+
+        if (!$this->renderbox_apikeytest('taxonomy')) {
+            return;
+        }
+
+        $term_id = 0;
+        if (is_object($term) && isset($term->term_id)) {
+            $term_id = $term->term_id;
+        }
+        $address_value = get_term_meta($term_id, 'wpugmapsabox_address', 1);
+        $base_dim = array(
+            'lat' => get_term_meta($term_id, 'wpugmapsabox_lat', 1),
+            'lng' => get_term_meta($term_id, 'wpugmapsabox_lng', 1)
+        );
+
+        echo $this->renderbox_content($base_dim, $address_value, 'taxonomy');
+
+    }
+
+    /* POST */
+
+    public function add_posttype_meta_box() {
+
+        if (!$this->renderbox_apikeytest('post')) {
+            return;
+        }
+
         global $post;
         $post_id = 0;
         if (is_object($post) && isset($post->ID)) {
             $post_id = $post->ID;
         }
-
-        wp_nonce_field('wpugmapsabox_save_meta_box_data', 'wpugmapsabox_meta_box_nonce');
+        $address_value = get_post_meta($post_id, 'wpugmapsabox_address', 1);
         $base_dim = array(
-            'lat' => 0,
-            'lng' => 0
+            'lat' => get_post_meta($post_id, 'wpugmapsabox_lat', 1),
+            'lng' => get_post_meta($post_id, 'wpugmapsabox_lng', 1)
         );
-        echo '<div class="wpugmapsabox-grid">';
-        if ($this->addlatlng) {
-            echo '<div class="map-latlng">';
-            foreach ($this->dim as $id => $name) {
-                $base_dim[$id] = get_post_meta($post_id, 'wpugmapsabox_' . $id, 1);
-                echo '<p><label for="wpugmapsabox-' . $id . '">' . $name . '</label><br />';
-                echo '<input id="wpugmapsabox-' . $id . '" type="text" name="wpugmapsabox_' . $id . '" value="' . get_post_meta($post_id, 'wpugmapsabox_' . $id, 1) . '" /></p>';
-            }
-            echo '</div>';
+
+        echo $this->renderbox_content($base_dim, $address_value, 'post');
+
+    }
+
+    /* Helpers */
+
+    public function renderbox_content($base_dim = array(), $address_value = '', $type = 'post') {
+        wp_nonce_field('wpugmapsabox_save_post_values', 'wpugmapsabox_meta_box_nonce');
+
+        $html = '';
+        if ($type == 'post') {
+            $html .= '<div class="wpugmapsabox-grid">';
+            $html .= '<div class="map-latlng ' . ($this->addlatlng ? '' : 'map-latlng--noform') . '">';
+        } else {
+            $html .= '<tr class="form-field">';
+            $html .= '<th colspan="2"><h3>' . __('Geocoding', 'wpugmapsabox') . '</h3></th>';
+            $html .= '</tr>';
         }
+
+        foreach ($this->dim as $id => $name) {
+            if ($this->addlatlng) {
+
+                $label = '<label for="wpugmapsabox-' . $id . '">' . $name . '</label>';
+                $input = '<input id="wpugmapsabox-' . $id . '" type="text" name="wpugmapsabox_' . $id . '" value="' . $base_dim[$id] . '" />';
+
+                if ($type == 'post') {
+                    $html .= '<p>' . $label . '<br />';
+                    $html .= $input;
+                    $html .= '</p>';
+                } else {
+                    $html .= '<tr class="form-field term-group-wrap">';
+                    $html .= '<th scope="row"><label for="feature-group">' . $label . '</label></th>';
+                    $html .= '<td>' . $input . '</td>';
+                    $html .= '</tr>';
+                }
+            } else {
+                $input = '<input id="wpugmapsabox-' . $id . '" type="hidden" name="wpugmapsabox_' . $id . '" value="' . $base_dim[$id] . '" />';
+                if ($type == 'post') {
+                    $html .= $input;
+                } else {
+                    $html .= '<tr><td colspan="2">' . $input . '</td></tr>';
+                }
+            }
+        }
+
+        if ($type == 'post') {
+            $html .= '</div>';
+            $html .= $this->render_baseimg($base_dim);
+            $html .= '</div>';
+        } else {
+            $html .= '<tr class="form-field term-group-wrap"><th></th><td>';
+            $html .= $this->render_baseimg($base_dim);
+            $html .= '</td></tr>';
+        }
+
+        $label = '<label for="wpugmapsabox-content">' . __('Address', 'wpugmapsabox') . '</label>';
+        $input = '<input id="wpugmapsabox-content" type="text" name="wpugmapsabox_address" class="widefat" value="' . esc_attr($address_value) . '" />';
+        $help = __('Please write an address below and click on a suggested result to update GPS coordinates', 'wpugmapsabox');
+
+        if ($type == 'taxonomy') {
+            $html .= '<tr class="form-field term-group-wrap">';
+            $html .= '<th scope="row"><label for="feature-group">' . $label . '</label></th>';
+            $html .= '<td>' . $input . '<p class="description">' . $help . '</p></td>';
+            $html .= '</tr>';
+
+        } else {
+            $html .= '<p>';
+            $html .= $label . '<br />';
+            $html .= $input . '<br />';
+            $html .= '<small>' . $help . '</small>';
+            $html .= '</p>';
+        }
+
+        return $html;
+    }
+
+    public function renderbox_apikeytest($type) {
+        $text = '<p>' . sprintf(__('Please add an <a href="%s" target="_blank">API Key</a> with Google Places API Web Service & Google Static Maps API.', 'wpugmapsabox'), 'https://console.developers.google.com/apis/library?project=_') . '</p>';
+        if (!$this->frontapi_key) {
+            if ($type == 'taxonomy') {
+                echo '<tr><th></th><td colspan="2">' . $text . '</td></tr>';
+            } else {
+                echo $text;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    public function render_baseimg($base_dim = array()) {
         $base_img = '';
         $coords = '';
         if ($base_dim['lat'] || $base_dim['lng']) {
             $coords = $base_dim['lat'] . ',' . $base_dim['lng'];
             $base_img = str_replace('{{coordinates}}', $coords, $this->base_previewurl);
-            $base_img = '<img src="' . $base_img . '" alt="" />';
+            $base_img = '<a target="_blank" href="https://maps.google.com/?q=' . $coords . '"><img src="' . $base_img . '" alt="" /></a>';
         }
-        echo '<div data-model="' . $this->base_previewurl . '" class="map-preview" id="wpugmapsabox-preview">';
-        if (!empty($base_img)) {
-            echo '<a target="_blank" href="https://maps.google.com/?q=' . $coords . '">' . $base_img . '</a>';
-        }
-        echo '</div>';
-
-        echo '</div>';
-
-        $address_value = get_post_meta($post_id, 'wpugmapsabox_address', 1);
-        echo '<p><label for="wpugmapsabox-content">' . __('Address', 'wpugmapsabox') . '</label><br />';
-        echo '<input id="wpugmapsabox-content" type="text" name="wpugmapsabox_address" class="widefat" value="' . esc_attr($address_value) . '" /><br />';
-        echo '<small>' . __('Please write an address below and click on a suggested result to update GPS coordinates', 'wpugmapsabox') . '</small></p>';
+        return '<div data-model="' . $this->base_previewurl . '" class="map-preview" id="wpugmapsabox-preview">' . $base_img . '</div>';
     }
 
-    public function save_meta_box_data($post_id) {
+    /* ----------------------------------------------------------
+      Save values
+    ---------------------------------------------------------- */
 
-        if (!isset($_POST['wpugmapsabox_meta_box_nonce']) || !wp_verify_nonce($_POST['wpugmapsabox_meta_box_nonce'], 'wpugmapsabox_save_meta_box_data')) {
+    /* TAXO */
+
+    public function save_taxo_values($term_id, $tt_id) {
+
+        if (!isset($_POST['wpugmapsabox_meta_box_nonce']) || !wp_verify_nonce($_POST['wpugmapsabox_meta_box_nonce'], 'wpugmapsabox_save_post_values')) {
+            return;
+        }
+
+        foreach ($this->dim as $id => $name) {
+            if (isset($_POST['wpugmapsabox_' . $id])) {
+                update_term_meta($term_id, 'wpugmapsabox_' . $id, sanitize_text_field($_POST['wpugmapsabox_' . $id]));
+            }
+        }
+        if (isset($_POST['wpugmapsabox_address'])) {
+            update_term_meta($term_id, 'wpugmapsabox_address', sanitize_text_field($_POST['wpugmapsabox_address']));
+        }
+    }
+
+    /* POST */
+
+    public function save_post_values($post_id) {
+
+        if (!isset($_POST['wpugmapsabox_meta_box_nonce']) || !wp_verify_nonce($_POST['wpugmapsabox_meta_box_nonce'], 'wpugmapsabox_save_post_values')) {
             return;
         }
 

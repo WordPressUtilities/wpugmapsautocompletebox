@@ -5,7 +5,7 @@ Add a Google Maps Autocomplete box on edit post pages.
 ## How to manually add set-up the plugin :
 
 ```php
-// API key
+// API key : Google Places API Web Service & Google Static Maps API
 add_filter( 'wpugmapsautocompletebox_apikey', 'set_wpugmapsautocompletebox_apikey', 10, 3 );
 function set_wpugmapsautocompletebox_apikey() {
     return 'mygoogleapikey';
@@ -25,6 +25,13 @@ add_filter( 'wpugmapsautocompletebox_posttypes', 'set_wpugmapsautocompletebox_po
 function set_wpugmapsautocompletebox_posttypes($post_types) {
     $post_types[] = 'page';
     return $post_types;
+}
+
+// Taxonomies
+add_filter( 'wpugmapsautocompletebox_taxonomies', 'set_wpugmapsautocompletebox_taxonomies', 10, 3 );
+function set_wpugmapsautocompletebox_taxonomies($taxonomies) {
+    $taxonomies[] = 'category';
+    return $taxonomies;
 }
 ```
 
