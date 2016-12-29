@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.4
+Version: 0.4.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,7 +13,7 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.4';
+    public $version = '0.4.1';
 
     public function __construct() {
         if (!is_admin()) {
@@ -155,7 +155,7 @@ class WPUGMapsAutocompleteBox {
             $html .= '<div class="wpugmapsabox-grid">';
             $html .= '<div class="map-latlng ' . ($this->addlatlng ? '' : 'map-latlng--noform') . '">';
         } else {
-            $html .= '<tr class="form-field">';
+            $html .= '<tr class="form-field form-field--wpugmapsabox-title">';
             $html .= '<th colspan="2"><h3>' . __('Geocoding', 'wpugmapsabox') . '</h3></th>';
             $html .= '</tr>';
         }
@@ -181,7 +181,7 @@ class WPUGMapsAutocompleteBox {
                 if ($type == 'post') {
                     $html .= $input;
                 } else {
-                    $html .= '<tr><td colspan="2">' . $input . '</td></tr>';
+                    $html .= '<tr class="screen-reader-text"><td colspan="2">' . $input . '</td></tr>';
                 }
             }
         }
@@ -249,7 +249,12 @@ class WPUGMapsAutocompleteBox {
 
     public function save_taxo_values($term_id, $tt_id) {
 
+        // Check nonce
         if (!isset($_POST['wpugmapsabox_meta_box_nonce']) || !wp_verify_nonce($_POST['wpugmapsabox_meta_box_nonce'], 'wpugmapsabox_save_post_values')) {
+            return;
+        }
+
+        if (!current_user_can('manage_categories')) {
             return;
         }
 
@@ -267,11 +272,12 @@ class WPUGMapsAutocompleteBox {
 
     public function save_post_values($post_id) {
 
-        if (!isset($_POST['wpugmapsabox_meta_box_nonce']) || !wp_verify_nonce($_POST['wpugmapsabox_meta_box_nonce'], 'wpugmapsabox_save_post_values')) {
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
             return;
         }
 
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        // Check nonce
+        if (!isset($_POST['wpugmapsabox_meta_box_nonce']) || !wp_verify_nonce($_POST['wpugmapsabox_meta_box_nonce'], 'wpugmapsabox_save_post_values')) {
             return;
         }
 

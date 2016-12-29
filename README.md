@@ -11,13 +11,13 @@ function set_wpugmapsautocompletebox_apikey() {
     return 'mygoogleapikey';
 }
 
-// Box language
+// Box language (default to current locale)
 add_filter( 'wpugmapsautocompletebox_apilang', 'set_wpugmapsautocompletebox_apilang', 10, 3 );
 function set_wpugmapsautocompletebox_apilang() {
     return 'fr';
 }
 
-// Add built-in lat / lng post metas
+// Add visible lat / lng post metas
 add_filter('wpugmapsautocompletebox_addlatlng', '__return_true', 10, 1);
 
 // Post types
