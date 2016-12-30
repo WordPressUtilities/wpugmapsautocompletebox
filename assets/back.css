@@ -38,10 +38,6 @@
     opacity: 0.99;
 }
 
-.form-field--wpugmapsabox-title h3 {
-    margin: 0;
-}
-
 @media(max-width:1000px) {
     .wpugmapsabox-grid > * {
         float: none;

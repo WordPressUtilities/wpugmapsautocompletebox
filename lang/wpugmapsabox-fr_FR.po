@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Google Maps Autocomplete Box\n"
-"POT-Creation-Date: 2016-12-28 20:48+0100\n"
+"POT-Creation-Date: 2016-12-30 23:27+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Darklg <darklg.blog@gmail.com>\n"
 "Language-Team: \n"
@@ -23,15 +23,15 @@ msgstr "Latitude"
 msgid "Longitude"
 msgstr "Longitude"
 
-#: .././wpugmapsautocompletebox.php:73 .././wpugmapsautocompletebox.php:159
+#: .././wpugmapsautocompletebox.php:73 .././wpugmapsautocompletebox.php:158
 msgid "Geocoding"
 msgstr "Géocodage"
 
-#: .././wpugmapsautocompletebox.php:199
+#: .././wpugmapsautocompletebox.php:197
 msgid "Address"
 msgstr "Adresse"
 
-#: .././wpugmapsautocompletebox.php:201
+#: .././wpugmapsautocompletebox.php:199
 msgid ""
 "Please write an address below and click on a suggested result to update GPS "
 "coordinates"
@@ -39,7 +39,7 @@ msgstr ""
 "Veuillez remplir l'adresse ci-dessous, et cliquer sur un résultat suggéré "
 "afin de mettre à jour les coordonnées GPS."
 
-#: .././wpugmapsautocompletebox.php:221
+#: .././wpugmapsautocompletebox.php:219
 #, php-format
 msgid ""
 "Please add an <a href=\"%s\" target=\"_blank\">API Key</a> with Google "

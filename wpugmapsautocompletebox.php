@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.4.1
+Version: 0.4.2
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,7 +13,7 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.4.1';
+    public $version = '0.4.2';
 
     public function __construct() {
         if (!is_admin()) {
@@ -155,9 +155,7 @@ class WPUGMapsAutocompleteBox {
             $html .= '<div class="wpugmapsabox-grid">';
             $html .= '<div class="map-latlng ' . ($this->addlatlng ? '' : 'map-latlng--noform') . '">';
         } else {
-            $html .= '<tr class="form-field form-field--wpugmapsabox-title">';
-            $html .= '<th colspan="2"><h3>' . __('Geocoding', 'wpugmapsabox') . '</h3></th>';
-            $html .= '</tr>';
+            $html .= '</table><h2>' . __('Geocoding', 'wpugmapsabox') . '</h2><table class="form-table">';
         }
 
         foreach ($this->dim as $id => $name) {
@@ -172,7 +170,7 @@ class WPUGMapsAutocompleteBox {
                     $html .= '</p>';
                 } else {
                     $html .= '<tr class="form-field term-group-wrap">';
-                    $html .= '<th scope="row"><label for="feature-group">' . $label . '</label></th>';
+                    $html .= '<th scope="row">' . $label . '</th>';
                     $html .= '<td>' . $input . '</td>';
                     $html .= '</tr>';
                 }
@@ -202,7 +200,7 @@ class WPUGMapsAutocompleteBox {
 
         if ($type == 'taxonomy') {
             $html .= '<tr class="form-field term-group-wrap">';
-            $html .= '<th scope="row"><label for="feature-group">' . $label . '</label></th>';
+            $html .= '<th scope="row">' . $label . '</th>';
             $html .= '<td>' . $input . '<p class="description">' . $help . '</p></td>';
             $html .= '</tr>';
 
