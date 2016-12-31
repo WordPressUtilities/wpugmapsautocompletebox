@@ -101,6 +101,7 @@ class WPUBaseSettings {
             $settings[$id]['help'] = isset($input['help']) ? $input['help'] : '';
             $settings[$id]['type'] = isset($input['type']) ? $input['type'] : 'text';
             $settings[$id]['section'] = isset($input['section']) ? $input['section'] : $default_section;
+            $settings[$id]['datas'] = isset($input['datas']) && is_array($input['datas']) ? $input['datas'] : array(__('No'), __('Yes'));
             $settings[$id]['user_cap'] = $this->settings_details['sections'][$settings[$id]['section']]['user_cap'];
         }
 
@@ -128,6 +129,7 @@ class WPUBaseSettings {
                 'name' => $this->settings_details['option_id'] . '[' . $id . ']',
                 'id' => $id,
                 'label_for' => $id,
+                'datas' => $this->settings[$id]['datas'],
                 'type' => $this->settings[$id]['type'],
                 'help' => $this->settings[$id]['help'],
                 'label_check' => $this->settings[$id]['label_check']
@@ -143,14 +145,17 @@ class WPUBaseSettings {
             if (isset($setting['regex'])) {
                 if (isset($input[$id]) && preg_match($setting['regex'], $input[$id])) {
                     $options[$id] = $input[$id];
+                } else {
+                    if (isset($setting['default'])) {
+                        $options[$id] = $setting['default'];
+                    }
                 }
                 continue;
             }
 
             // Set a default value
-            // - if not sent
-            // - if user is not allowed
             if ($setting['type'] != 'checkbox') {
+                // - if not sent or if user is not allowed
                 if (!isset($input[$id]) || !current_user_can($setting['user_cap'])) {
                     $input[$id] = isset($options[$id]) ? $options[$id] : '0';
                 }
@@ -159,6 +164,11 @@ class WPUBaseSettings {
             switch ($setting['type']) {
             case 'checkbox':
                 $option_id = isset($input[$id]) ? '1' : '0';
+                break;
+            case 'select':
+                if (!array_key_exists($input[$id], $setting['datas'])) {
+                    $option_id = key($setting['datas']);
+                }
                 break;
             case 'email':
                 if (filter_var($input[$id], FILTER_VALIDATE_EMAIL) === false) {
@@ -174,6 +184,9 @@ class WPUBaseSettings {
                 if (!is_numeric($input[$id])) {
                     $option_id = 0;
                 }
+                break;
+            case 'editor':
+                $option_id = trim($input[$id]);
                 break;
             default:
                 $option_id = esc_html(trim($input[$id]));
@@ -195,7 +208,8 @@ class WPUBaseSettings {
     public function render__field($args = array()) {
         $option_id = $this->settings_details['option_id'];
         $options = get_option($option_id);
-        $name = ' name="' . $option_id . '[' . $args['id'] . ']" ';
+        $name_val = $option_id . '[' . $args['id'] . ']';
+        $name = ' name="' . $name_val . '" ';
         $id = ' id="' . $args['id'] . '" ';
         $value = isset($options[$args['id']]) ? $options[$args['id']] : '';
 
@@ -206,6 +220,19 @@ class WPUBaseSettings {
             break;
         case 'textarea':
             echo '<textarea ' . $name . ' ' . $id . ' cols="50" rows="5">' . esc_attr($value) . '</textarea>';
+            break;
+        case 'select':
+            echo '<select ' . $name . ' ' . $id . '>';
+            foreach ($args['datas'] as $_id => $_data) {
+                echo '<option value="' . esc_attr($_id) . '" ' . ($value == $_id ? 'selected="selected"' : '') . '>' . $_data . '</option>';
+            }
+            echo '</select>';
+            break;
+        case 'editor':
+            wp_editor($value, $option_id . '_' . $args['id'], array(
+                'textarea_rows' => 3,
+                'textarea_name' => $name_val
+            ));
             break;
         case 'url':
         case 'number':
