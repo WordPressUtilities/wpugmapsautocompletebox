@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.4.2
+Version: 0.5
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,7 +13,10 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.4.2';
+    public $version = '0.5';
+    public $base_previewurl = '';
+    public $dim = array();
+    public $options = array();
 
     public function __construct() {
         if (!is_admin()) {
@@ -22,34 +25,84 @@ class WPUGMapsAutocompleteBox {
         add_action('wp_loaded', array(&$this,
             'wp_loaded'
         ));
+
+        $this->options = array(
+            'plugin_publicname' => 'Maps Autocomplete',
+            'plugin_name' => 'Maps Autocomplete',
+            'plugin_id' => 'wpugmapsabox',
+            'plugin_parent' => 'options-general.php',
+            'plugin_pageslug' => 'wpugmapsabox'
+        );
+
+        $this->options['admin_url'] = admin_url($this->options['plugin_parent'] . '?page=' . $this->options['plugin_pageslug']);
     }
 
     public function wp_loaded() {
+        load_plugin_textdomain('wpugmapsabox', false, dirname(plugin_basename(__FILE__)) . '/lang/');
+        $locale = explode('_', get_locale());
 
+        // Messages
+        include 'inc/WPUBaseMessages.php';
+        $this->messages = new \wpugmapsabox\WPUBaseMessages($this->options['plugin_id']);
+
+        // Settings
+        $this->settings_details = array(
+            'create_page' => true,
+            'plugin_id' => 'wpugmapsabox',
+            'plugin_name' => 'Maps Autocomplete',
+            'sections' => array(
+                'base' => array(
+                    'name' => __('Settings')
+                )
+            )
+        );
+        $this->settings = array(
+            'addlatlng' => array(
+                'label' => __('Add Lat Lng', 'wpugmapsabox'),
+                'label_check' => __('Add editable boxes with latitude & longitude.', 'wpugmapsabox'),
+                'type' => 'checkbox'
+            ),
+            'apikey' => array(
+                'label' => __('Maps API Key', 'wpugmapsabox')
+            )
+        );
+        include 'inc/WPUBaseSettings.php';
+        new \wpugmapsabox\WPUBaseSettings($this->settings_details, $this->settings);
+
+        $this->settings_values = get_option($this->settings_details['option_id']);
+
+        add_filter("plugin_action_links_" . plugin_basename(__FILE__), array(&$this,
+            'add_settings_link'
+        ));
+
+        /* Base settings */
         $this->post_types = apply_filters('wpugmapsautocompletebox_posttypes', array(
             'post'
         ));
         $this->taxonomies = apply_filters('wpugmapsautocompletebox_taxonomies', array(
             'category'
         ));
-
-        load_plugin_textdomain('wpugmapsabox', false, dirname(plugin_basename(__FILE__)) . '/lang/');
-
-        $locale = explode('_', get_locale());
+        $apikey = '';
+        $addlatlng = false;
+        if (is_array($this->settings_values)) {
+            $apikey = isset($this->settings_values['apikey']) ? trim($this->settings_values['apikey']) : '';
+            $addlatlng = isset($this->settings_values['addlatlng']) ? (bool) $this->settings_values['addlatlng'] : false;
+        }
         $this->mainlang = apply_filters('wpugmapsautocompletebox_apilang', $locale[0]);
-        $this->frontapi_key = apply_filters('wpugmapsautocompletebox_apikey', '');
-        $this->addlatlng = apply_filters('wpugmapsautocompletebox_addlatlng', false);
+        $this->frontapi_key = apply_filters('wpugmapsautocompletebox_apikey', $apikey);
+        $this->addlatlng = apply_filters('wpugmapsautocompletebox_addlatlng', $addlatlng);
 
+        /* Init vars */
         $this->base_previewurl = 'https://maps.googleapis.com/maps/api/staticmap?center={{coordinates}}&zoom=14&size=300x100&maptype=roadmap&markers={{coordinates}}&key=' . $this->frontapi_key;
         $this->dim = array(
             'lat' => __('Latitude', 'wpugmapsabox'),
             'lng' => __('Longitude', 'wpugmapsabox')
         );
 
+        /* Setup boxes */
         add_action('add_meta_boxes', array(&$this,
             'add_custom_meta_boxes'
         ));
-
         foreach ($this->taxonomies as $taxonomy_box) {
             add_action($taxonomy_box . '_edit_form_fields', array(&$this,
                 'add_taxo_meta_box'
@@ -59,7 +112,6 @@ class WPUGMapsAutocompleteBox {
             ), 10, 2);
 
         }
-
         add_action('admin_enqueue_scripts', array(&$this,
             'enqueue_scripts'
         ));
@@ -74,6 +126,14 @@ class WPUGMapsAutocompleteBox {
                 'add_posttype_meta_box'
             ), $post_type_box);
         }
+    }
+
+    /* Settings link */
+
+    public function add_settings_link($links) {
+        $settings_link = '<a href="' . $this->options['admin_url'] . '">' . __('Settings') . '</a>';
+        array_unshift($links, $settings_link);
+        return $links;
     }
 
     public function enqueue_scripts() {

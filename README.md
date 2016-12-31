@@ -55,7 +55,3 @@ $lat = get_post_meta(get_the_ID(),'wpugmapsabox_lat',1);
 $lng = get_post_meta(get_the_ID(),'wpugmapsabox_lng',1);
 ```
 
-## TODO
-
-* Translation.
-* WPU Option for API Key.

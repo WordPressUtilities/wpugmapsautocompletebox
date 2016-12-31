@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Google Maps Autocomplete Box\n"
-"POT-Creation-Date: 2016-12-30 23:27+0100\n"
+"POT-Creation-Date: 2016-12-31 16:04+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Darklg <darklg.blog@gmail.com>\n"
 "Language-Team: \n"
@@ -15,23 +15,52 @@ msgstr ""
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-SearchPath-0: ../.\n"
 
-#: .././wpugmapsautocompletebox.php:45
+#: .././inc/WPUBaseSettings.php:67
+msgid "Import Settings"
+msgstr "Réglages"
+
+#: .././inc/WPUBaseSettings.php:188
+msgid "Settings saved."
+msgstr "Paramètres sauvegardés"
+
+#: .././inc/WPUBaseSettings.php:230 .././wpugmapsautocompletebox.php:55
+#: .././wpugmapsautocompletebox.php:134
+msgid "Settings"
+msgstr "Réglages"
+
+#: .././inc/WPUBaseSettings.php:243
+msgid "Save"
+msgstr "Enregistrer"
+
+#: .././wpugmapsautocompletebox.php:61
+msgid "Add Lat Lng"
+msgstr "Ajouter Lat Lng"
+
+#: .././wpugmapsautocompletebox.php:62
+msgid "Add editable boxes with latitude & longitude."
+msgstr "Ajouter des boîtes éditables avec la latitude et la longitude."
+
+#: .././wpugmapsautocompletebox.php:66
+msgid "Maps API Key"
+msgstr "Clé d'API"
+
+#: .././wpugmapsautocompletebox.php:98
 msgid "Latitude"
 msgstr "Latitude"
 
-#: .././wpugmapsautocompletebox.php:46
+#: .././wpugmapsautocompletebox.php:99
 msgid "Longitude"
 msgstr "Longitude"
 
-#: .././wpugmapsautocompletebox.php:73 .././wpugmapsautocompletebox.php:158
+#: .././wpugmapsautocompletebox.php:125 .././wpugmapsautocompletebox.php:218
 msgid "Geocoding"
 msgstr "Géocodage"
 
-#: .././wpugmapsautocompletebox.php:197
+#: .././wpugmapsautocompletebox.php:257
 msgid "Address"
 msgstr "Adresse"
 
-#: .././wpugmapsautocompletebox.php:199
+#: .././wpugmapsautocompletebox.php:259
 msgid ""
 "Please write an address below and click on a suggested result to update GPS "
 "coordinates"
@@ -39,7 +68,7 @@ msgstr ""
 "Veuillez remplir l'adresse ci-dessous, et cliquer sur un résultat suggéré "
 "afin de mettre à jour les coordonnées GPS."
 
-#: .././wpugmapsautocompletebox.php:219
+#: .././wpugmapsautocompletebox.php:279
 #, php-format
 msgid ""
 "Please add an <a href=\"%s\" target=\"_blank\">API Key</a> with Google "
