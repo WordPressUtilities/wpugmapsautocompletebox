@@ -20,6 +20,9 @@ function set_wpugmapsautocompletebox_apilang() {
 // Add visible lat / lng post metas
 add_filter('wpugmapsautocompletebox_addlatlng', '__return_true', 10, 1);
 
+// Add visible address fields
+add_filter('wpugmapsautocompletebox_addaddressfields', '__return_true', 10, 1);
+
 // Post types
 add_filter( 'wpugmapsautocompletebox_posttypes', 'set_wpugmapsautocompletebox_posttypes', 10, 3 );
 function set_wpugmapsautocompletebox_posttypes($post_types) {

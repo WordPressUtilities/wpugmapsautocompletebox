@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.5.1
+Version: 0.6
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,7 +13,7 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.5.1';
+    public $version = '0.6';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
@@ -50,6 +50,7 @@ class WPUGMapsAutocompleteBox {
             'create_page' => true,
             'plugin_id' => 'wpugmapsabox',
             'plugin_name' => 'Maps Autocomplete',
+            'option_id' => 'wpugmapsabox_options',
             'sections' => array(
                 'base' => array(
                     'name' => __('Settings')
@@ -60,6 +61,11 @@ class WPUGMapsAutocompleteBox {
             'addlatlng' => array(
                 'label' => __('Add Lat Lng', 'wpugmapsabox'),
                 'label_check' => __('Add editable boxes with latitude & longitude.', 'wpugmapsabox'),
+                'type' => 'checkbox'
+            ),
+            'addaddressfields' => array(
+                'label' => __('Add Address Fields', 'wpugmapsabox'),
+                'label_check' => __('Add editable boxes with address fields.', 'wpugmapsabox'),
                 'type' => 'checkbox'
             ),
             'apikey' => array(
@@ -84,21 +90,49 @@ class WPUGMapsAutocompleteBox {
         ));
         $apikey = '';
         $addlatlng = false;
+        $addaddressfields = false;
         if (is_array($this->settings_values)) {
             $apikey = isset($this->settings_values['apikey']) ? trim($this->settings_values['apikey']) : '';
             $addlatlng = isset($this->settings_values['addlatlng']) ? (bool) $this->settings_values['addlatlng'] : false;
+            $addaddressfields = isset($this->settings_values['addaddressfields']) ? (bool) $this->settings_values['addaddressfields'] : false;
         }
         $this->mainlang = apply_filters('wpugmapsautocompletebox_apilang', $locale[0]);
         $this->frontapi_key = apply_filters('wpugmapsautocompletebox_apikey', $apikey);
         $this->addlatlng = apply_filters('wpugmapsautocompletebox_addlatlng', $addlatlng);
+        $this->addaddressfields = apply_filters('wpugmapsautocompletebox_addaddressfields', $addaddressfields);
 
         /* Init vars */
         $this->base_previewurl = 'https://maps.googleapis.com/maps/api/staticmap?center={{coordinates}}&zoom=14&size=300x100&maptype=roadmap&markers={{coordinates}}&key=' . $this->frontapi_key;
         $this->dim = array(
-            'lat' => __('Latitude', 'wpugmapsabox'),
-            'lng' => __('Longitude', 'wpugmapsabox')
+            'lat' => array(
+                'name' => __('Latitude', 'wpugmapsabox'),
+                'type' => 'latlng'
+            ),
+            'lng' => array(
+                'name' => __('Longitude', 'wpugmapsabox'),
+                'type' => 'latlng'
+            ),
+            'street_number' => array(
+                'name' => __('Street number', 'wpugmapsabox'),
+                'type' => 'addressfields'
+            ),
+            'route' => array(
+                'name' => __('Street name', 'wpugmapsabox'),
+                'type' => 'addressfields'
+            ),
+            'postal_code' => array(
+                'name' => __('Postal code', 'wpugmapsabox'),
+                'type' => 'addressfields'
+            ),
+            'locality' => array(
+                'name' => __('Locality', 'wpugmapsabox'),
+                'type' => 'addressfields'
+            ),
+            'country' => array(
+                'name' => __('Country', 'wpugmapsabox'),
+                'type' => 'addressfields'
+            )
         );
-
         /* Setup boxes */
         add_action('add_meta_boxes', array(&$this,
             'add_custom_meta_boxes'
@@ -173,10 +207,10 @@ class WPUGMapsAutocompleteBox {
             $term_id = $term->term_id;
         }
         $address_value = get_term_meta($term_id, 'wpugmapsabox_address', 1);
-        $base_dim = array(
-            'lat' => get_term_meta($term_id, 'wpugmapsabox_lat', 1),
-            'lng' => get_term_meta($term_id, 'wpugmapsabox_lng', 1)
-        );
+        $base_dim = array();
+        foreach ($this->dim as $id => $name) {
+            $base_dim[$id] = get_term_meta($term_id, 'wpugmapsabox_' . $id, 1);
+        }
 
         echo $this->renderbox_content($base_dim, $address_value, 'taxonomy');
 
@@ -196,11 +230,10 @@ class WPUGMapsAutocompleteBox {
             $post_id = $post->ID;
         }
         $address_value = get_post_meta($post_id, 'wpugmapsabox_address', 1);
-        $base_dim = array(
-            'lat' => get_post_meta($post_id, 'wpugmapsabox_lat', 1),
-            'lng' => get_post_meta($post_id, 'wpugmapsabox_lng', 1)
-        );
-
+        $base_dim = array();
+        foreach ($this->dim as $id => $name) {
+            $base_dim[$id] = get_post_meta($post_id, 'wpugmapsabox_' . $id, 1);
+        }
         echo $this->renderbox_content($base_dim, $address_value, 'post');
 
     }
@@ -213,15 +246,15 @@ class WPUGMapsAutocompleteBox {
         $html = '';
         if ($type == 'post') {
             $html .= '<div class="wpugmapsabox-grid">';
-            $html .= '<div class="map-latlng ' . ($this->addlatlng ? '' : 'map-latlng--noform') . '">';
+            $html .= '<div class="map-latlng ' . ($this->addlatlng || $this->addaddressfields ? '' : 'map-latlng--noform') . '">';
         } else {
             $html .= '</table><h2>' . __('Geocoding', 'wpugmapsabox') . '</h2><table class="form-table">';
         }
 
-        foreach ($this->dim as $id => $name) {
-            if ($this->addlatlng) {
+        foreach ($this->dim as $id => $field) {
+            if ($this->addlatlng && $field['type'] == 'latlng' || $this->addaddressfields && $field['type'] == 'addressfields') {
 
-                $label = '<label for="wpugmapsabox-' . $id . '">' . $name . '</label>';
+                $label = '<label for="wpugmapsabox-' . $id . '">' . $field['name'] . '</label>';
                 $input = '<input id="wpugmapsabox-' . $id . '" type="text" name="wpugmapsabox_' . $id . '" value="' . $base_dim[$id] . '" />';
 
                 if ($type == 'post') {
@@ -352,6 +385,18 @@ class WPUGMapsAutocompleteBox {
             update_post_meta($post_id, 'wpugmapsabox_address', sanitize_text_field($_POST['wpugmapsabox_address']));
         }
     }
+
+    /* ----------------------------------------------------------
+      Install
+    ---------------------------------------------------------- */
+
+    public function uninstall() {
+        delete_post_meta_by_key('wpugmapsabox_address');
+        foreach ($this->dim as $id => $name) {
+            delete_post_meta_by_key('wpugmapsabox_' . $id);
+        }
+    }
+
 }
 
 $WPUGMapsAutocompleteBox = new WPUGMapsAutocompleteBox();
