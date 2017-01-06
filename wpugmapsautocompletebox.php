@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.6
+Version: 0.6.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,7 +13,7 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.6';
+    public $version = '0.6.1';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
@@ -102,7 +102,7 @@ class WPUGMapsAutocompleteBox {
         $this->addaddressfields = apply_filters('wpugmapsautocompletebox_addaddressfields', $addaddressfields);
 
         /* Init vars */
-        $this->base_previewurl = 'https://maps.googleapis.com/maps/api/staticmap?center={{coordinates}}&zoom=14&size=300x100&maptype=roadmap&markers={{coordinates}}&key=' . $this->frontapi_key;
+        $this->base_previewurl = 'https://maps.googleapis.com/maps/api/staticmap?center={{coordinates}}&zoom={{zoom}}&size={{dimensions}}&maptype=roadmap&markers={{coordinates}}&key=' . $this->frontapi_key;
         $this->dim = array(
             'lat' => array(
                 'name' => __('Latitude', 'wpugmapsabox'),
@@ -244,13 +244,44 @@ class WPUGMapsAutocompleteBox {
         wp_nonce_field('wpugmapsabox_save_post_values', 'wpugmapsabox_meta_box_nonce');
 
         $html = '';
-        if ($type == 'post') {
-            $html .= '<div class="wpugmapsabox-grid">';
-            $html .= '<div class="map-latlng ' . ($this->addlatlng || $this->addaddressfields ? '' : 'map-latlng--noform') . '">';
-        } else {
+
+        if ($type == 'taxonomy') {
             $html .= '</table><h2>' . __('Geocoding', 'wpugmapsabox') . '</h2><table class="form-table">';
         }
 
+        /* Address preview */
+        $label = '<label for="wpugmapsabox-content">' . __('Address', 'wpugmapsabox') . '</label>';
+        $input = '<input id="wpugmapsabox-content" type="text" name="wpugmapsabox_address" class="widefat" value="' . esc_attr($address_value) . '" />';
+        $help = __('Please write an address below and click on a suggested result to update GPS coordinates', 'wpugmapsabox');
+
+        if ($type == 'taxonomy') {
+            $html .= '<tr class="form-field term-group-wrap">';
+            $html .= '<th scope="row">' . $label . '</th>';
+            $html .= '<td>' . $input . '<p class="description">' . $help . '</p></td>';
+            $html .= '</tr>';
+
+        } else {
+            $html .= '<p>';
+            $html .= $label . '<br />';
+            $html .= $input . '<br />';
+            $html .= '<small>' . $help . '</small>';
+            $html .= '</p>';
+        }
+
+        /* Preview image for taxonomy */
+        if ($type == 'taxonomy') {
+            $html .= '<tr class="form-field term-group-wrap"><th></th><td>';
+            $html .= $this->render_baseimg($base_dim, 'taxonomy');
+            $html .= '</td></tr>';
+        }
+
+        /* Grid start for post */
+        if ($type == 'post') {
+            $html .= '<div class="wpugmapsabox-grid">';
+            $html .= '<div class="map-latlng ' . ($this->addlatlng || $this->addaddressfields ? '' : 'map-latlng--noform') . '">';
+        }
+
+        /* Fields */
         foreach ($this->dim as $id => $field) {
             if ($this->addlatlng && $field['type'] == 'latlng' || $this->addaddressfields && $field['type'] == 'addressfields') {
 
@@ -277,32 +308,11 @@ class WPUGMapsAutocompleteBox {
             }
         }
 
+        /* Grid end + Preview image for post */
         if ($type == 'post') {
             $html .= '</div>';
             $html .= $this->render_baseimg($base_dim);
             $html .= '</div>';
-        } else {
-            $html .= '<tr class="form-field term-group-wrap"><th></th><td>';
-            $html .= $this->render_baseimg($base_dim);
-            $html .= '</td></tr>';
-        }
-
-        $label = '<label for="wpugmapsabox-content">' . __('Address', 'wpugmapsabox') . '</label>';
-        $input = '<input id="wpugmapsabox-content" type="text" name="wpugmapsabox_address" class="widefat" value="' . esc_attr($address_value) . '" />';
-        $help = __('Please write an address below and click on a suggested result to update GPS coordinates', 'wpugmapsabox');
-
-        if ($type == 'taxonomy') {
-            $html .= '<tr class="form-field term-group-wrap">';
-            $html .= '<th scope="row">' . $label . '</th>';
-            $html .= '<td>' . $input . '<p class="description">' . $help . '</p></td>';
-            $html .= '</tr>';
-
-        } else {
-            $html .= '<p>';
-            $html .= $label . '<br />';
-            $html .= $input . '<br />';
-            $html .= '<small>' . $help . '</small>';
-            $html .= '</p>';
         }
 
         return $html;
@@ -321,15 +331,25 @@ class WPUGMapsAutocompleteBox {
         return true;
     }
 
-    public function render_baseimg($base_dim = array()) {
+    public function render_baseimg($base_dim = array(), $type = 'post') {
         $base_img = '';
         $coords = '';
+        $zoom = 15;
+        $dimensions = $this->addaddressfields ? '350x300' : '350x100';
+        if ($this->addaddressfields && $this->addlatlng) {
+            $dimensions = '350x400';
+        }
+        if ($type == 'taxonomy') {
+            $dimensions = '600x250';
+        }
         if ($base_dim['lat'] || $base_dim['lng']) {
             $coords = $base_dim['lat'] . ',' . $base_dim['lng'];
             $base_img = str_replace('{{coordinates}}', $coords, $this->base_previewurl);
+            $base_img = str_replace('{{zoom}}', $zoom, $base_img);
+            $base_img = str_replace('{{dimensions}}', $dimensions, $base_img);
             $base_img = '<a target="_blank" href="https://maps.google.com/?q=' . $coords . '"><img src="' . $base_img . '" alt="" /></a>';
         }
-        return '<div data-model="' . $this->base_previewurl . '" class="map-preview" id="wpugmapsabox-preview">' . $base_img . '</div>';
+        return '<div data-dimensions="' . $dimensions . '" data-zoom="' . $zoom . '" data-model="' . $this->base_previewurl . '" class="map-preview" id="wpugmapsabox-preview">' . $base_img . '</div>';
     }
 
     /* ----------------------------------------------------------

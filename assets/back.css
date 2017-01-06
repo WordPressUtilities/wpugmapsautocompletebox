@@ -10,7 +10,13 @@
 
 .wpugmapsabox-grid > * {
     float: left;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
     width: 50%;
+}
+
+.wpugmapsabox-grid > *:first-child:not(.map-latlng--noform) {
+    padding-right: 20px;
 }
 
 .wpugmapsabox-grid > *:not(.map-latlng--noform) + * {
@@ -19,6 +25,14 @@
 
 .wpugmapsabox-grid + p {
     margin-top: 0;
+}
+
+.wpugmapsabox-grid input[type="text"] {
+    display: block;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 800px;
 }
 
 .wpugmapsabox-grid a[target] {
@@ -38,10 +52,86 @@
     opacity: 0.99;
 }
 
+.wpugmapsabox-grid .map-preview img {
+    max-width: 100%;
+}
+
+/* Category
+-------------------------- */
+
+.term-group-wrap .map-preview img {
+    max-width: 95%;
+}
+
+@media(max-width:782px) {
+    .term-group-wrap .map-preview img {
+        max-width: 100%;
+    }
+}
+
+/* Side
+-------------------------- */
+
+#side-sortables .wpugmapsabox-grid {
+    display: flex;
+    flex-flow: column;
+}
+
+#side-sortables .wpugmapsabox-grid > * {
+    float: none;
+    order: 2;
+    width: auto;
+    padding-right: 1px!important;
+    text-align: left!important;
+}
+
+#side-sortables .wpugmapsabox-grid > * + * {
+    order: 1;
+}
+
+#side-sortables .wpugmapsabox-grid a[target] {
+    padding-top: 0;
+}
+
+#side-sortables .wpugmapsabox-grid .map-preview img {
+    width: 100%;
+    max-height: 150px;
+    object-fit: cover;
+}
+
+/* Mobile
+-------------------------- */
+
 @media(max-width:1000px) {
+    .wpugmapsabox-grid {
+        display: flex;
+        flex-flow: column;
+    }
+
     .wpugmapsabox-grid > * {
         float: none;
+        order: 2;
         width: auto;
-        text-align: left;
+        padding-right: 1px!important;
+    }
+
+    .wpugmapsabox-grid > * + * {
+        order: 1;
+    }
+
+    .wpugmapsabox-grid a[target] {
+        padding-top: 0;
+        text-align: center;
+    }
+
+    .wpugmapsabox-grid .map-preview {
+        text-align: center;
+    }
+
+    .wpugmapsabox-grid .map-preview img {
+        width: 100%;
+        margin: auto;
+        max-height: 150px;
+        object-fit: cover;
     }
 }

@@ -42,6 +42,7 @@ jQuery(document).ready(function() {
             if ($lng) {
                 $lng.val(lng);
             }
+            console.log(place);
             if (typeof place == 'object' && place.address_components.length) {
                 for (i = 0, len = place.address_components.length; i < len; i++) {
                     place_details[place.address_components[i].types[0]] = place.address_components[i].long_name;
@@ -56,6 +57,8 @@ jQuery(document).ready(function() {
                 var coords = lat + ',' + lng;
                 // Set preview img
                 var preview_img = $preview.attr('data-model').replace(/\{\{coordinates\}\}/g, coords);
+                preview_img = preview_img.replace(/\{\{dimensions\}\}/g, $preview.attr('data-dimensions'), preview_img);
+                preview_img = preview_img.replace(/\{\{zoom\}\}/g, $preview.attr('data-zoom'), preview_img);
                 $preview.html('<a target="_blank" href="https://maps.google.com/?q=' + coords + '"><img src="' + preview_img + '" alt="" />');
             }
         }
