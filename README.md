@@ -36,6 +36,20 @@ function set_wpugmapsautocompletebox_taxonomies($taxonomies) {
     $taxonomies[] = 'category';
     return $taxonomies;
 }
+
+// Custom dimensions or meta ids
+add_filter('wpugmapsautocompletebox_dim', 'set_wpugmapsautocompletebox_dim', 10, 3);
+function set_wpugmapsautocompletebox_dim($dim) {
+    if (!function_exists('get_current_screen')) {
+        return $dim;
+    }
+    $screen = get_current_screen();
+    if (is_object($screen) && $screen->base != 'post' && $screen->id != 'instagram_posts') {
+        $dim['lat']['id'] = 'instagram_post_latitude';
+        $dim['lng']['id'] = 'instagram_post_longitude';
+    }
+    return $dim;
+}
 ```
 
 ## How to add a JS event :
