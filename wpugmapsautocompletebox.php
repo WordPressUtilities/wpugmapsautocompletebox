@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.7
+Version: 0.7.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,7 +13,7 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.7';
+    public $version = '0.7.1';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
@@ -46,6 +46,7 @@ class WPUGMapsAutocompleteBox {
         $this->messages = new \wpugmapsabox\WPUBaseMessages($this->options['plugin_id']);
 
         // Settings
+        $this->apikey_message = sprintf(__('Please add an <a href="%s" target="_blank">API Key</a> with Google Places API Web Service & Google Static Maps API.', 'wpugmapsabox'), 'https://console.developers.google.com/apis/library?project=_');
         $this->settings_details = array(
             'create_page' => true,
             'plugin_id' => 'wpugmapsabox',
@@ -69,7 +70,8 @@ class WPUGMapsAutocompleteBox {
                 'type' => 'checkbox'
             ),
             'apikey' => array(
-                'label' => __('Maps API Key', 'wpugmapsabox')
+                'label' => __('Maps API Key', 'wpugmapsabox'),
+                'help' => $this->apikey_message
             )
         );
         include 'inc/WPUBaseSettings.php';
@@ -134,6 +136,13 @@ class WPUGMapsAutocompleteBox {
             )
         );
 
+        /* API */
+        if (!$this->frontapi_key) {
+            add_action('admin_notices', array(&$this,
+                'set_error_missing_apikey'
+            ));
+        }
+
         /* Setup boxes */
         add_action('add_meta_boxes', array(&$this,
             'add_custom_meta_boxes'
@@ -189,6 +198,11 @@ class WPUGMapsAutocompleteBox {
         wp_enqueue_script('wpugmapsabox-back', plugins_url('/assets/back.js', __FILE__), array(
             'jquery'
         ), $this->version, true);
+    }
+
+    /* Settings */
+    public function set_error_missing_apikey() {
+        echo '<div class="error"><p>' . sprintf(__('You need an API Key to use <b>%s</b>. Please fill it in the <a href="%s">options page</a>.', 'wpugmapsabox'), $this->options['plugin_publicname'], $this->options['admin_url']) . '</p></div>';
     }
 
     /* ----------------------------------------------------------
@@ -324,7 +338,7 @@ class WPUGMapsAutocompleteBox {
     }
 
     public function renderbox_apikeytest($type) {
-        $text = '<p>' . sprintf(__('Please add an <a href="%s" target="_blank">API Key</a> with Google Places API Web Service & Google Static Maps API.', 'wpugmapsabox'), 'https://console.developers.google.com/apis/library?project=_') . '</p>';
+        $text = '<p>' . $this->apikey_message . '</p>';
         if (!$this->frontapi_key) {
             if ($type == 'taxonomy') {
                 echo '<tr><th></th><td colspan="2">' . $text . '</td></tr>';
