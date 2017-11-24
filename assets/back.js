@@ -19,7 +19,7 @@ jQuery(document).ready(function() {
     var autocomplete = new google.maps.places.Autocomplete(input);
     var $lat = jQuery('#wpugmapsabox-lat');
     var $lng = jQuery('#wpugmapsabox-lng');
-    var address_fields = ['route', 'postal_code', 'country', 'locality', 'street_number'];
+    var address_fields = ['premise', 'route', 'postal_code', 'country', 'locality', 'street_number'];
     var $preview = jQuery('#wpugmapsabox-preview');
 
     // Prevent native ENTER press
@@ -29,7 +29,7 @@ jQuery(document).ready(function() {
 
     // Trigger an event on autocomplete
     google.maps.event.addListener(autocomplete, 'place_changed', function() {
-        var i, y, len,
+        var i, len, tmp_field,
             place_details = {},
             place = autocomplete.getPlace();
         if (place && place.geometry && place.geometry.location) {
@@ -48,8 +48,12 @@ jQuery(document).ready(function() {
                     place_details[place.address_components[i].types[0]] = place.address_components[i].long_name;
                 }
                 for (i = 0, len = address_fields.length; i < len; i++) {
+                    tmp_field = jQuery('#wpugmapsabox-' + address_fields[i]);
                     if (place_details[address_fields[i]]) {
-                        jQuery('#wpugmapsabox-' + address_fields[i]).val(place_details[address_fields[i]]);
+                        tmp_field.val(place_details[address_fields[i]]);
+                    }
+                    else {
+                        tmp_field.val('');
                     }
                 }
             }
