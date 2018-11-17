@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.8.0
+Version: 0.9.0
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,10 +13,11 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.8.0';
+    public $version = '0.9.0';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
+    public $static_zoom_level = 14;
 
     public function __construct() {
         if (!is_admin()) {
@@ -102,6 +103,7 @@ class WPUGMapsAutocompleteBox {
         $this->frontapi_key = apply_filters('wpugmapsautocompletebox_apikey', $apikey);
         $this->addlatlng = apply_filters('wpugmapsautocompletebox_addlatlng', $addlatlng);
         $this->addaddressfields = apply_filters('wpugmapsautocompletebox_addaddressfields', $addaddressfields);
+        $this->static_zoom_level = apply_filters('wpugmapsautocompletebox_static_zoom_level', $this->static_zoom_level);
 
         /* Init vars */
         $this->base_previewurl = 'https://maps.googleapis.com/maps/api/staticmap?center={{coordinates}}&zoom={{zoom}}&size={{dimensions}}&maptype=roadmap&markers={{coordinates}}&key=' . $this->frontapi_key;
@@ -357,7 +359,6 @@ class WPUGMapsAutocompleteBox {
     public function render_baseimg($base_dim = array(), $type = 'post') {
         $base_img = '';
         $coords = '';
-        $zoom = 15;
         $dimensions = $this->addaddressfields ? '350x300' : '350x100';
         if ($this->addaddressfields && $this->addlatlng) {
             $dimensions = '350x400';
@@ -368,11 +369,53 @@ class WPUGMapsAutocompleteBox {
         if ($base_dim['lat'] || $base_dim['lng']) {
             $coords = $base_dim['lat'] . ',' . $base_dim['lng'];
             $base_img = str_replace('{{coordinates}}', $coords, $this->base_previewurl);
-            $base_img = str_replace('{{zoom}}', $zoom, $base_img);
+            $base_img = str_replace('{{zoom}}', $this->static_zoom_level, $base_img);
             $base_img = str_replace('{{dimensions}}', $dimensions, $base_img);
+            $base_img = $this->get_static_map_url($base_img);
             $base_img = '<a target="_blank" href="https://maps.google.com/?q=' . $coords . '"><img src="' . $base_img . '" alt="" /></a>';
         }
-        return '<div data-dimensions="' . $dimensions . '" data-zoom="' . $zoom . '" data-model="' . $this->base_previewurl . '" class="map-preview" id="wpugmapsabox-preview">' . $base_img . '</div>';
+        return '<div data-dimensions="' . $dimensions . '" data-zoom="' . $this->static_zoom_level . '" data-model="' . $this->base_previewurl . '" class="map-preview" id="wpugmapsabox-preview">' . $base_img . '</div>';
+    }
+
+    public function get_static_map_url($base_img) {
+        if (!function_exists('curl_init')) {
+            return $base_img;
+        }
+        $img = md5($base_img) . '.png';
+        $dirname = '/wpugmapsabox/';
+        $up_dir = wp_upload_dir();
+        $up_dir_maps = $up_dir['basedir'] . $dirname;
+        $up_url_maps = $up_dir['baseurl'] . $dirname;
+
+        /* Check if path exists */
+        if (!is_dir($up_dir_maps)) {
+            mkdir($up_dir_maps);
+        }
+
+        $image = $this->cache_image($base_img, $up_dir_maps . $img);
+        if (!$image) {
+            return $base_img;
+        }
+
+        return $up_url_maps . $img;
+    }
+
+    public function cache_image($url, $savepath) {
+        if (file_exists($savepath)) {
+            return $savepath;
+        }
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
+        /* Set referer to check correct permissions for Google APIs */
+        curl_setopt($ch, CURLOPT_REFERER, get_site_url());
+        $raw = curl_exec($ch);
+        curl_close($ch);
+        $fp = fopen($savepath, 'x');
+        fwrite($fp, $raw);
+        fclose($fp);
+        return file_exists($savepath);
     }
 
     /* ----------------------------------------------------------
