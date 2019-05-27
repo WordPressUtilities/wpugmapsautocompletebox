@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.9.0
+Version: 0.10.0
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,7 +13,7 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.9.0';
+    public $version = '0.10.0';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
@@ -91,6 +91,12 @@ class WPUGMapsAutocompleteBox {
         $this->taxonomies = apply_filters('wpugmapsautocompletebox_taxonomies', array(
             'category'
         ));
+
+        foreach ($this->post_types as $post_type) {
+            add_filter('manage_' . $post_type . '_posts_columns', array(&$this, 'show_columns_head'));
+            add_action('manage_' . $post_type . '_posts_custom_column', array(&$this, 'show_columns_content'), 10, 2);
+        }
+
         $apikey = '';
         $addlatlng = false;
         $addaddressfields = false;
@@ -209,6 +215,26 @@ class WPUGMapsAutocompleteBox {
     /* Settings */
     public function set_error_missing_apikey() {
         echo '<div class="error"><p>' . sprintf(__('You need an API Key to use <b>%s</b>. Please fill it in the <a href="%s">options page</a>.', 'wpugmapsabox'), $this->options['plugin_publicname'], $this->options['admin_url']) . '</p></div>';
+    }
+
+    /* ----------------------------------------------------------
+      List
+    ---------------------------------------------------------- */
+
+    public function show_columns_head($defaults) {
+        $defaults['wpugmapsabox_map'] = 'Map';
+        return $defaults;
+    }
+
+    public function show_columns_content($column_name, $post_id) {
+        if ($column_name != 'wpugmapsabox_map') {
+            return;
+        }
+        $base_dim = array(
+            'lat' => get_post_meta(get_the_ID(), 'wpugmapsabox_lat', 1),
+            'lng' => get_post_meta(get_the_ID(), 'wpugmapsabox_lng', 1)
+        );
+        echo '<div style="max-width:150px">' . $this->render_baseimg($base_dim) . '</div>';
     }
 
     /* ----------------------------------------------------------
@@ -372,7 +398,7 @@ class WPUGMapsAutocompleteBox {
             $base_img = str_replace('{{zoom}}', $this->static_zoom_level, $base_img);
             $base_img = str_replace('{{dimensions}}', $dimensions, $base_img);
             $base_img = $this->get_static_map_url($base_img);
-            $base_img = '<a target="_blank" href="https://maps.google.com/?q=' . $coords . '"><img src="' . $base_img . '" alt="" /></a>';
+            $base_img = '<a target="_blank" href="https://maps.google.com/?q=' . $coords . '"><img style="max-width:100%" src="' . $base_img . '" alt="" /></a>';
         }
         return '<div data-dimensions="' . $dimensions . '" data-zoom="' . $this->static_zoom_level . '" data-model="' . $this->base_previewurl . '" class="map-preview" id="wpugmapsabox-preview">' . $base_img . '</div>';
     }
