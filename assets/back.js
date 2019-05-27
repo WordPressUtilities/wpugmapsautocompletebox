@@ -42,7 +42,7 @@ jQuery(document).ready(function() {
             if ($lng) {
                 $lng.val(lng);
             }
-            console.log(place);
+            $input.trigger('wpugmapsautocompletebox', place);
             if (typeof place == 'object' && place.address_components.length) {
                 for (i = 0, len = place.address_components.length; i < len; i++) {
                     place_details[place.address_components[i].types[0]] = place.address_components[i].long_name;
