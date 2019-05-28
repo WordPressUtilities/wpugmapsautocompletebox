@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.10.1
+Version: 0.11.0
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,11 +13,12 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.10.1';
+    public $version = '0.11.0';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
     public $static_zoom_level = 14;
+    public $cache_dir = '/wpugmapsabox/';
 
     public function __construct() {
         if (!is_admin()) {
@@ -39,11 +40,19 @@ class WPUGMapsAutocompleteBox {
     }
 
     public function wp_loaded() {
+
         load_plugin_textdomain('wpugmapsabox', false, dirname(plugin_basename(__FILE__)) . '/lang/');
         $locale = explode('_', get_locale());
 
+        // Base Update
+        include dirname(__FILE__) . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
+        $this->settings_update = new \wpugmapsabox\WPUBaseUpdate(
+            'WordPressUtilities',
+            'wpugmapsautocompletebox',
+            $this->version);
+
         // Messages
-        include 'inc/WPUBaseMessages.php';
+        include dirname(__FILE__) . '/inc/WPUBaseMessages/WPUBaseMessages.php';
         $this->messages = new \wpugmapsabox\WPUBaseMessages($this->options['plugin_id']);
 
         // Settings
@@ -75,7 +84,8 @@ class WPUGMapsAutocompleteBox {
                 'help' => $this->apikey_message
             )
         );
-        include 'inc/WPUBaseSettings.php';
+
+        include dirname(__FILE__) . '/inc/WPUBaseSettings/WPUBaseSettings.php';
         new \wpugmapsabox\WPUBaseSettings($this->settings_details, $this->settings);
 
         $this->settings_values = get_option($this->settings_details['option_id']);
@@ -408,10 +418,9 @@ class WPUGMapsAutocompleteBox {
             return $base_img;
         }
         $img = md5($base_img) . '.png';
-        $dirname = '/wpugmapsabox/';
         $up_dir = wp_upload_dir();
-        $up_dir_maps = $up_dir['basedir'] . $dirname;
-        $up_url_maps = $up_dir['baseurl'] . $dirname;
+        $up_dir_maps = $up_dir['basedir'] . $this->cache_dir;
+        $up_url_maps = $up_dir['baseurl'] . $this->cache_dir;
 
         /* Check if path exists */
         if (!is_dir($up_dir_maps)) {
@@ -430,6 +439,7 @@ class WPUGMapsAutocompleteBox {
         if (file_exists($savepath)) {
             return $savepath;
         }
+
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -438,9 +448,9 @@ class WPUGMapsAutocompleteBox {
         curl_setopt($ch, CURLOPT_REFERER, get_site_url());
         $raw = curl_exec($ch);
         curl_close($ch);
-        $fp = fopen($savepath, 'x');
-        fwrite($fp, $raw);
-        fclose($fp);
+
+        file_put_contents($savepath, $raw);
+
         return file_exists($savepath);
     }
 
@@ -510,6 +520,21 @@ class WPUGMapsAutocompleteBox {
         foreach ($this->dim as $id => $name) {
             delete_post_meta_by_key('wpugmapsabox_' . $id);
         }
+        $this->purge_cache_dir();
+    }
+
+    public function purge_cache_dir() {
+        $up_dir = wp_upload_dir();
+        $up_dir_maps = $up_dir['basedir'] . $this->cache_dir;
+        if (!is_dir($up_dir_maps)) {
+            return;
+        }
+
+        $it = new RecursiveDirectoryIterator($up_dir_maps);
+        foreach (new RecursiveIteratorIterator($it) as $file) {
+            unlink($file);
+        }
+        rmdir($up_dir_maps);
     }
 
 }
