@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Google Maps Autocomplete Box\n"
-"POT-Creation-Date: 2019-05-28 23:28+0200\n"
+"POT-Creation-Date: 2019-05-29 19:22+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Darklg <darklg.blog@gmail.com>\n"
 "Language-Team: \n"
@@ -18,7 +18,7 @@ msgstr ""
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:127
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:456
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:463
-#: .././wpugmapsautocompletebox.php:67 .././wpugmapsautocompletebox.php:200
+#: .././wpugmapsautocompletebox.php:67 .././wpugmapsautocompletebox.php:216
 msgid "Settings"
 msgstr "Réglages"
 
@@ -57,7 +57,7 @@ msgstr "Ajouter Lat Lng"
 
 #: .././wpugmapsautocompletebox.php:74
 msgid "Add editable boxes with latitude & longitude."
-msgstr "Ajouter des boîtes éditables avec la latitude et la longitude."
+msgstr "Ajoutez des boîtes éditables avec la latitude et la longitude."
 
 #: .././wpugmapsautocompletebox.php:78
 msgid "Add Address Fields"
@@ -68,46 +68,62 @@ msgid "Add editable boxes with address fields."
 msgstr "Ajoutez des boîtes éditables avec des champs d’adresse."
 
 #: .././wpugmapsautocompletebox.php:83
+msgid "Add Places Informations"
+msgstr "Ajouter des informations sur les lieux"
+
+#: .././wpugmapsautocompletebox.php:84
+msgid "Add editable boxes with informations on places."
+msgstr "Ajoutez des boîtes éditables avec des informations sur les lieux."
+
+#: .././wpugmapsautocompletebox.php:88
 msgid "Maps API Key"
 msgstr "Clé d'API"
 
-#: .././wpugmapsautocompletebox.php:128
+#: .././wpugmapsautocompletebox.php:136
 msgid "Latitude"
 msgstr "Latitude"
 
-#: .././wpugmapsautocompletebox.php:132
+#: .././wpugmapsautocompletebox.php:140
 msgid "Longitude"
 msgstr "Longitude"
 
-#: .././wpugmapsautocompletebox.php:136
+#: .././wpugmapsautocompletebox.php:144
 msgid "Premise"
 msgstr "Lieu"
 
-#: .././wpugmapsautocompletebox.php:140
+#: .././wpugmapsautocompletebox.php:148
 msgid "Street number"
 msgstr "Numéro de rue"
 
-#: .././wpugmapsautocompletebox.php:144
+#: .././wpugmapsautocompletebox.php:152
 msgid "Street name"
 msgstr "Nom de la rue"
 
-#: .././wpugmapsautocompletebox.php:148
+#: .././wpugmapsautocompletebox.php:156
 msgid "Postal code"
 msgstr "Code postal"
 
-#: .././wpugmapsautocompletebox.php:152
+#: .././wpugmapsautocompletebox.php:160
 msgid "Locality"
 msgstr "Ville"
 
-#: .././wpugmapsautocompletebox.php:156
+#: .././wpugmapsautocompletebox.php:164
 msgid "Country"
 msgstr "Pays"
 
-#: .././wpugmapsautocompletebox.php:191 .././wpugmapsautocompletebox.php:309
+#: .././wpugmapsautocompletebox.php:168
+msgid "Phone"
+msgstr "Téléphone"
+
+#: .././wpugmapsautocompletebox.php:172
+msgid "Website"
+msgstr "Site web"
+
+#: .././wpugmapsautocompletebox.php:207 .././wpugmapsautocompletebox.php:325
 msgid "Geocoding"
 msgstr "Géocodage"
 
-#: .././wpugmapsautocompletebox.php:227
+#: .././wpugmapsautocompletebox.php:243
 #, php-format
 msgid ""
 "You need an API Key to use <b>%s</b>. Please fill it in the <a href=\"%s"
@@ -116,11 +132,11 @@ msgstr ""
 "Vous avez besoin d’une clé API pour utiliser <b>%s</b>. Merci de la "
 "spécifier dans <a href=\"%s\">la page d'options</a>."
 
-#: .././wpugmapsautocompletebox.php:313
+#: .././wpugmapsautocompletebox.php:329
 msgid "Address"
 msgstr "Adresse"
 
-#: .././wpugmapsautocompletebox.php:315
+#: .././wpugmapsautocompletebox.php:331
 msgid ""
 "Please write an address below and click on a suggested result to update GPS "
 "coordinates"

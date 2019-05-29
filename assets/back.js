@@ -20,6 +20,10 @@ jQuery(document).ready(function() {
     var $lat = jQuery('#wpugmapsabox-lat');
     var $lng = jQuery('#wpugmapsabox-lng');
     var address_fields = ['premise', 'route', 'postal_code', 'country', 'locality', 'street_number'];
+    var place_fields = {
+        'formatted_phone_number' : 'phone',
+        'website' : 'website',
+    };
     var $preview = jQuery('#wpugmapsabox-preview');
 
     // Prevent native ENTER press
@@ -33,6 +37,8 @@ jQuery(document).ready(function() {
             place_details = {},
             place = autocomplete.getPlace();
         if (place && place.geometry && place.geometry.location) {
+
+            /* Lat / Lng fields */
             var lat = place.geometry.location.lat();
             var lng = place.geometry.location.lng();
             jQuery(window).trigger('wpugmapsautocompletebox_newcoords', [lat, lng, place]);
@@ -43,6 +49,8 @@ jQuery(document).ready(function() {
                 $lng.val(lng);
             }
             $input.trigger('wpugmapsautocompletebox', place);
+
+            /* Address fields */
             if (typeof place == 'object' && place.address_components.length) {
                 for (i = 0, len = place.address_components.length; i < len; i++) {
                     place_details[place.address_components[i].types[0]] = place.address_components[i].long_name;
@@ -57,6 +65,20 @@ jQuery(document).ready(function() {
                     }
                 }
             }
+
+            /* Place fields */
+            if (typeof place == 'object') {
+                for (i in place_fields) {
+                    tmp_field = jQuery('#wpugmapsabox-' + place_fields[i]);
+                    if (place[i]) {
+                        tmp_field.val(place[i]);
+                    }
+                    else {
+                        tmp_field.val('');
+                    }
+                }
+            }
+
             if ($preview && lat && lng) {
                 var coords = lat + ',' + lng;
                 // Set preview img
