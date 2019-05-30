@@ -56,6 +56,10 @@
     max-width: 100%;
 }
 
+.wpugmapsabox-grid textarea {
+    width: 100%;
+}
+
 /* Category
 -------------------------- */
 

@@ -21,8 +21,9 @@ jQuery(document).ready(function() {
     var $lng = jQuery('#wpugmapsabox-lng');
     var address_fields = ['premise', 'route', 'postal_code', 'country', 'locality', 'street_number'];
     var place_fields = {
-        'formatted_phone_number' : 'phone',
-        'website' : 'website',
+        'formatted_phone_number': 'phone',
+        'website': 'website',
+        'opening_hours': 'opening_hours'
     };
     var $preview = jQuery('#wpugmapsabox-preview');
 
@@ -71,7 +72,12 @@ jQuery(document).ready(function() {
                 for (i in place_fields) {
                     tmp_field = jQuery('#wpugmapsabox-' + place_fields[i]);
                     if (place[i]) {
-                        tmp_field.val(place[i]);
+                        if (i == 'opening_hours' && place.opening_hours.weekday_text) {
+                            tmp_field.val(place.opening_hours.weekday_text.join("\n"));
+                        }
+                        else {
+                            tmp_field.val(place[i]);
+                        }
                     }
                     else {
                         tmp_field.val('');

@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.12.0
+Version: 0.13.0
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,7 +13,7 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.12.0';
+    public $version = '0.13.0';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
@@ -171,6 +171,11 @@ class WPUGMapsAutocompleteBox {
             'website' => array(
                 'name' => __('Website', 'wpugmapsabox'),
                 'type' => 'placefields'
+            ),
+            'opening_hours' => array(
+                'name' => __('Opening Hours', 'wpugmapsabox'),
+                'type' => 'placefields',
+                'field_type' => 'textarea'
             )
         );
 
@@ -363,7 +368,20 @@ class WPUGMapsAutocompleteBox {
             if ($this->addlatlng && $field['type'] == 'latlng' || $this->addaddressfields && $field['type'] == 'addressfields' || $this->addplacefields && $field['type'] == 'placefields') {
 
                 $label = '<label for="wpugmapsabox-' . $id . '">' . $field['name'] . '</label>';
-                $input = '<input id="wpugmapsabox-' . $id . '" type="text" name="wpugmapsabox_' . $id . '" value="' . $base_dim[$id] . '" />';
+
+                if (!isset($field['field_type'])) {
+                    $field['field_type'] = 'text';
+                }
+
+                switch ($field['field_type']) {
+                case 'textarea':
+
+                    $input = '<textarea id="wpugmapsabox-' . $id . '" type="text" name="wpugmapsabox_' . $id . '" rows="10">' . esc_html($base_dim[$id]) . '</textarea>';
+                    break;
+                default:
+                    $input = '<input id="wpugmapsabox-' . $id . '" type="text" name="wpugmapsabox_' . $id . '" value="' . $base_dim[$id] . '" />';
+
+                }
 
                 if ($type == 'post') {
                     $html .= '<p>' . $label . '<br />';
