@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.13.0
+Version: 0.14.0
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,7 +13,7 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.13.0';
+    public $version = '0.14.0';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
@@ -164,20 +164,36 @@ class WPUGMapsAutocompleteBox {
                 'name' => __('Country', 'wpugmapsabox'),
                 'type' => 'addressfields'
             ),
+            'place_name' => array(
+                'name' => __('Place Name', 'wpugmapsabox')
+            ),
             'phone' => array(
                 'name' => __('Phone', 'wpugmapsabox'),
-                'type' => 'placefields'
+                'type' => 'placefields',
+                'field_type' => 'tel'
+            ),
+            'international_phone_number' => array(
+                'name' => __('International Phone Number', 'wpugmapsabox')
             ),
             'website' => array(
                 'name' => __('Website', 'wpugmapsabox'),
-                'type' => 'placefields'
+                'type' => 'placefields',
+                'field_type' => 'url'
             ),
             'opening_hours' => array(
                 'name' => __('Opening Hours', 'wpugmapsabox'),
                 'type' => 'placefields',
                 'field_type' => 'textarea'
+            ),
+            'opening_hours_raw' => array(
+                'name' => __('Opening Hours (JSON)', 'wpugmapsabox')
             )
         );
+        foreach ($this->dim as $dim_id => $dim_value) {
+            if (!isset($dim_value['field_type'])) {
+                $this->dim[$dim_id]['field_type'] = 'text';
+            }
+        }
 
         /* API */
         if (!$this->frontapi_key) {
@@ -369,18 +385,12 @@ class WPUGMapsAutocompleteBox {
 
                 $label = '<label for="wpugmapsabox-' . $id . '">' . $field['name'] . '</label>';
 
-                if (!isset($field['field_type'])) {
-                    $field['field_type'] = 'text';
-                }
-
                 switch ($field['field_type']) {
                 case 'textarea':
-
-                    $input = '<textarea id="wpugmapsabox-' . $id . '" type="text" name="wpugmapsabox_' . $id . '" rows="10">' . esc_html($base_dim[$id]) . '</textarea>';
+                    $input = '<textarea rows="7" id="wpugmapsabox-' . $id . '" type="text" name="wpugmapsabox_' . $id . '" rows="10">' . esc_html(str_replace('<br />', "\n", $base_dim[$id])) . '</textarea>';
                     break;
                 default:
-                    $input = '<input id="wpugmapsabox-' . $id . '" type="text" name="wpugmapsabox_' . $id . '" value="' . $base_dim[$id] . '" />';
-
+                    $input = '<input id="wpugmapsabox-' . $id . '" type="' . $field['field_type'] . '" name="wpugmapsabox_' . $id . '" value="' . esc_attr($base_dim[$id]) . '" />';
                 }
 
                 if ($type == 'post') {
@@ -506,9 +516,17 @@ class WPUGMapsAutocompleteBox {
         }
 
         $this->dim = apply_filters('wpugmapsautocompletebox_dim', $this->dim);
-        foreach ($this->dim as $id => $name) {
-            if (isset($_POST['wpugmapsabox_' . $id])) {
-                update_term_meta($term_id, 'wpugmapsabox_' . $id, sanitize_text_field($_POST['wpugmapsabox_' . $id]));
+        foreach ($this->dim as $id => $dim) {
+            $_dim_id = (isset($dim['id'])) ? $dim['id'] : 'wpugmapsabox_' . $id;
+            if (isset($_POST[$_dim_id])) {
+                switch ($dim['field_type']) {
+                case 'textarea':
+                    update_term_meta($term_id, $_dim_id, sanitize_textarea_field($_POST[$_dim_id]));
+                    break;
+                default:
+                    update_term_meta($term_id, $_dim_id, sanitize_text_field($_POST[$_dim_id]));
+                    break;
+                }
             }
         }
         if (isset($_POST['wpugmapsabox_address'])) {
@@ -537,7 +555,14 @@ class WPUGMapsAutocompleteBox {
         foreach ($this->dim as $id => $dim) {
             $_dim_id = (isset($dim['id'])) ? $dim['id'] : 'wpugmapsabox_' . $id;
             if (isset($_POST[$_dim_id])) {
-                update_post_meta($post_id, $_dim_id, sanitize_text_field($_POST[$_dim_id]));
+                switch ($dim['field_type']) {
+                case 'textarea':
+                    update_post_meta($post_id, $_dim_id, sanitize_textarea_field($_POST[$_dim_id]));
+                    break;
+                default:
+                    update_post_meta($post_id, $_dim_id, sanitize_text_field($_POST[$_dim_id]));
+                    break;
+                }
             }
         }
         if (isset($_POST['wpugmapsabox_address'])) {

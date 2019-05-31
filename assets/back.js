@@ -23,7 +23,10 @@ jQuery(document).ready(function() {
     var place_fields = {
         'formatted_phone_number': 'phone',
         'website': 'website',
-        'opening_hours': 'opening_hours'
+        'name': 'place_name',
+        'international_phone_number': 'international_phone_number',
+        'opening_hours': 'opening_hours',
+        'opening_hours_json': 'opening_hours_json'
     };
     var $preview = jQuery('#wpugmapsabox-preview');
 
@@ -72,8 +75,16 @@ jQuery(document).ready(function() {
                 for (i in place_fields) {
                     tmp_field = jQuery('#wpugmapsabox-' + place_fields[i]);
                     if (place[i]) {
-                        if (i == 'opening_hours' && place.opening_hours.weekday_text) {
-                            tmp_field.val(place.opening_hours.weekday_text.join("\n"));
+                        if (i == 'opening_hours') {
+                            if (place.opening_hours.weekday_text) {
+                                tmp_field.val(place.opening_hours.weekday_text.join("\n"));
+                            }
+                            tmp_field = jQuery('#wpugmapsabox-' + place_fields[i] + '_raw');
+                            if (place.opening_hours.periods) {
+                                if (tmp_field.length > 0) {
+                                    tmp_field.val(JSON.stringify(place.opening_hours.periods));
+                                }
+                            }
                         }
                         else {
                             tmp_field.val(place[i]);

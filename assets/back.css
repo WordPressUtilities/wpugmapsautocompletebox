@@ -27,7 +27,8 @@
     margin-top: 0;
 }
 
-.wpugmapsabox-grid input[type="text"] {
+.wpugmapsabox-grid textarea,
+.wpugmapsabox-grid input:not([type="radio"]):not([type="checkbox"]):not([type="hidden"]) {
     display: block;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
@@ -54,10 +55,6 @@
 
 .wpugmapsabox-grid .map-preview img {
     max-width: 100%;
-}
-
-.wpugmapsabox-grid textarea {
-    width: 100%;
 }
 
 /* Category

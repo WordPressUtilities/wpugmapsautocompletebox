@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Google Maps Autocomplete Box\n"
-"POT-Creation-Date: 2019-05-30 21:59+0200\n"
+"POT-Creation-Date: 2019-05-31 12:41+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Darklg <darklg.blog@gmail.com>\n"
 "Language-Team: \n"
@@ -18,7 +18,7 @@ msgstr ""
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:127
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:456
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:463
-#: .././wpugmapsautocompletebox.php:67 .././wpugmapsautocompletebox.php:221
+#: .././wpugmapsautocompletebox.php:67 .././wpugmapsautocompletebox.php:237
 msgid "Settings"
 msgstr "Réglages"
 
@@ -112,22 +112,34 @@ msgid "Country"
 msgstr "Pays"
 
 #: .././wpugmapsautocompletebox.php:168
+msgid "Place Name"
+msgstr "Nom du lieu"
+
+#: .././wpugmapsautocompletebox.php:171
 msgid "Phone"
 msgstr "Téléphone"
 
-#: .././wpugmapsautocompletebox.php:172
+#: .././wpugmapsautocompletebox.php:176
+msgid "International Phone Number"
+msgstr "Numéro de téléphone international"
+
+#: .././wpugmapsautocompletebox.php:179
 msgid "Website"
 msgstr "Site web"
 
-#: .././wpugmapsautocompletebox.php:176
+#: .././wpugmapsautocompletebox.php:184
 msgid "Opening Hours"
 msgstr "Heures d'ouverture"
 
-#: .././wpugmapsautocompletebox.php:212 .././wpugmapsautocompletebox.php:330
+#: .././wpugmapsautocompletebox.php:189
+msgid "Opening Hours (JSON)"
+msgstr "Heures d’ouverture (JSON)"
+
+#: .././wpugmapsautocompletebox.php:228 .././wpugmapsautocompletebox.php:346
 msgid "Geocoding"
 msgstr "Géocodage"
 
-#: .././wpugmapsautocompletebox.php:248
+#: .././wpugmapsautocompletebox.php:264
 #, php-format
 msgid ""
 "You need an API Key to use <b>%s</b>. Please fill it in the <a href=\"%s"
@@ -136,11 +148,11 @@ msgstr ""
 "Vous avez besoin d’une clé API pour utiliser <b>%s</b>. Merci de la "
 "spécifier dans <a href=\"%s\">la page d'options</a>."
 
-#: .././wpugmapsautocompletebox.php:334
+#: .././wpugmapsautocompletebox.php:350
 msgid "Address"
 msgstr "Adresse"
 
-#: .././wpugmapsautocompletebox.php:336
+#: .././wpugmapsautocompletebox.php:352
 msgid ""
 "Please write an address below and click on a suggested result to update GPS "
 "coordinates"
