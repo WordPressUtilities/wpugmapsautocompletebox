@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.14.0
+Version: 0.14.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,7 +13,7 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.14.0';
+    public $version = '0.14.1';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
@@ -128,6 +128,7 @@ class WPUGMapsAutocompleteBox {
         $this->addaddressfields = apply_filters('wpugmapsautocompletebox_addaddressfields', $addaddressfields);
         $this->addplacefields = apply_filters('wpugmapsautocompletebox_addplacefields', $addplacefields);
         $this->static_zoom_level = apply_filters('wpugmapsautocompletebox_static_zoom_level', $this->static_zoom_level);
+        $this->cache_dir = apply_filters('wpugmapsautocompletebox_cache_dir', $this->cache_dir);
 
         /* Init vars */
         $this->base_previewurl = 'https://maps.googleapis.com/maps/api/staticmap?center={{coordinates}}&zoom={{zoom}}&size={{dimensions}}&maptype=roadmap&markers={{coordinates}}&key=' . $this->frontapi_key;
@@ -404,7 +405,7 @@ class WPUGMapsAutocompleteBox {
                     $html .= '</tr>';
                 }
             } else {
-                $input = '<input id="wpugmapsabox-' . $id . '" type="hidden" name="wpugmapsabox_' . $id . '" value="' . $base_dim[$id] . '" />';
+                $input = '<input id="wpugmapsabox-' . $id . '" type="hidden" name="wpugmapsabox_' . $id . '" value="' . esc_attr($base_dim[$id]) . '" />';
                 if ($type == 'post') {
                     $html .= $input;
                 } else {
