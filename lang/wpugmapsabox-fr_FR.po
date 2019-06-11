@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Google Maps Autocomplete Box\n"
-"POT-Creation-Date: 2019-06-02 20:45+0200\n"
+"POT-Creation-Date: 2019-06-11 18:49+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Darklg <darklg.blog@gmail.com>\n"
 "Language-Team: \n"
@@ -18,7 +18,7 @@ msgstr ""
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:127
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:456
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:463
-#: .././wpugmapsautocompletebox.php:67 .././wpugmapsautocompletebox.php:238
+#: .././wpugmapsautocompletebox.php:67 .././wpugmapsautocompletebox.php:241
 msgid "Settings"
 msgstr "Réglages"
 
@@ -135,11 +135,11 @@ msgstr "Heures d'ouverture"
 msgid "Opening Hours (JSON)"
 msgstr "Heures d’ouverture (JSON)"
 
-#: .././wpugmapsautocompletebox.php:229 .././wpugmapsautocompletebox.php:347
+#: .././wpugmapsautocompletebox.php:232 .././wpugmapsautocompletebox.php:350
 msgid "Geocoding"
 msgstr "Géocodage"
 
-#: .././wpugmapsautocompletebox.php:265
+#: .././wpugmapsautocompletebox.php:268
 #, php-format
 msgid ""
 "You need an API Key to use <b>%s</b>. Please fill it in the <a href=\"%s"
@@ -148,11 +148,11 @@ msgstr ""
 "Vous avez besoin d’une clé API pour utiliser <b>%s</b>. Merci de la "
 "spécifier dans <a href=\"%s\">la page d'options</a>."
 
-#: .././wpugmapsautocompletebox.php:351
+#: .././wpugmapsautocompletebox.php:354
 msgid "Address"
 msgstr "Adresse"
 
-#: .././wpugmapsautocompletebox.php:353
+#: .././wpugmapsautocompletebox.php:356
 msgid ""
 "Please write an address below and click on a suggested result to update GPS "
 "coordinates"
