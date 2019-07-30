@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.14.2
+Version: 0.14.3
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,7 +13,7 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.14.2';
+    public $version = '0.14.3';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
@@ -603,3 +603,37 @@ class WPUGMapsAutocompleteBox {
 }
 
 $WPUGMapsAutocompleteBox = new WPUGMapsAutocompleteBox();
+
+/* ----------------------------------------------------------
+  Helpers
+---------------------------------------------------------- */
+
+/**
+ * Get a post address
+ * @param  int     $post_id     Post ID
+ * @param  array   $args        List of arguments
+ * @return string               Post address
+ */
+function wpugmapsautocomplete_get_post_address($post_id = false, $args = array()) {
+    if (!$post_id) {
+        $post_id = get_the_ID();
+    }
+    if (!$post_id) {
+        return '';
+    }
+    if (!is_array($args)) {
+        $args = array();
+    }
+    if (!isset($args['return_format'])) {
+        $args['return_format'] = '{{street_number}} {{route}}<br />{{postal_code}} {{locality}}';
+    }
+
+    /* Extract values */
+    $return_value = $args['return_format'];
+    preg_match_all('/\{\{([a-z_]+)\}\}/', $args['return_format'], $matches);
+    foreach ($matches[1] as $_match) {
+        $meta_value = get_post_meta($post_id, 'wpugmapsabox_'.$_match, 1);
+        $return_value = str_replace('{{' . $_match . '}}', $meta_value, $return_value);
+    }
+    return $return_value;
+}
