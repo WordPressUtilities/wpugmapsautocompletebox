@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.14.3
+Version: 0.15.0
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,7 +13,7 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.14.3';
+    public $version = '0.15.0';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
@@ -210,6 +210,8 @@ class WPUGMapsAutocompleteBox {
         add_action('add_meta_boxes', array(&$this,
             'add_custom_meta_boxes'
         ));
+
+        /* Taxos */
         foreach ($this->taxonomies as $taxonomy_box) {
             add_action($taxonomy_box . '_edit_form_fields', array(&$this,
                 'add_taxo_meta_box'
@@ -217,8 +219,17 @@ class WPUGMapsAutocompleteBox {
             add_action('edited_' . $taxonomy_box, array(&$this,
                 'save_taxo_values'
             ), 10, 2);
-
         }
+
+        /* User */
+        add_action('edit_user_profile', array(&$this,
+            'add_user_meta_box'
+        ), 10, 1);
+        add_action('edit_user_profile_update', array(&$this,
+            'save_user_values'
+        ));
+
+        /* Actions */
         add_action('admin_enqueue_scripts', array(&$this,
             'enqueue_scripts'
         ));
@@ -246,7 +257,7 @@ class WPUGMapsAutocompleteBox {
     public function enqueue_scripts() {
         $currentScreen = get_current_screen();
 
-        if ($currentScreen->base != "post" && $currentScreen->base != "term") {
+        if ($currentScreen->base != "post" && $currentScreen->base != "term" && $currentScreen->base != 'user-edit') {
             return;
         }
         if ($currentScreen->base == "post" && !in_array($currentScreen->post_type, $this->post_types)) {
@@ -291,6 +302,36 @@ class WPUGMapsAutocompleteBox {
     /* ----------------------------------------------------------
       Render boxes
     ---------------------------------------------------------- */
+
+    /* USER */
+
+    public function add_user_meta_box($user) {
+
+        if(!current_user_can('edit_users')){
+            return;
+        }
+
+        if (!$this->renderbox_apikeytest('user')) {
+            return;
+        }
+        $user_id = 0;
+        if (is_object($user) && isset($user->ID) && is_numeric($user->ID)) {
+            $user_id = $user->ID;
+        }
+
+        $screen = get_current_screen();
+        $is_user_edit = ($screen->base == 'profile');
+
+        $address_value = get_user_meta($user_id, 'wpugmapsabox_address', 1);
+        $base_dim = array();
+        $this->dim = apply_filters('wpugmapsautocompletebox_dim', $this->dim);
+        foreach ($this->dim as $id => $name) {
+            $base_dim[$id] = get_user_meta($user_id, 'wpugmapsabox_' . $id, 1);
+        }
+
+        echo $this->renderbox_content($base_dim, $address_value, 'user');
+
+    }
 
     /* TAXO */
 
@@ -350,13 +391,22 @@ class WPUGMapsAutocompleteBox {
             $html .= '</table><h2>' . __('Geocoding', 'wpugmapsabox') . '</h2><table class="form-table">';
         }
 
+        if ($type == 'user') {
+            $html .= '<h3>' . __('Geocoding', 'wpugmapsabox') . '</h3><table class="form-table">';
+        }
+
+        $tr_classes = 'form-field';
+        if ($type == 'taxonomy') {
+            $tr_classes .= ' term-group-wrap';
+        }
+
         /* Address preview */
         $label = '<label for="wpugmapsabox-content">' . __('Address', 'wpugmapsabox') . '</label>';
         $input = '<input id="wpugmapsabox-content" type="text" name="wpugmapsabox_address" class="widefat" value="' . esc_attr($address_value) . '" />';
         $help = __('Please write an address below and click on a suggested result to update GPS coordinates', 'wpugmapsabox');
 
-        if ($type == 'taxonomy') {
-            $html .= '<tr class="form-field term-group-wrap">';
+        if ($type == 'taxonomy' || $type == 'user') {
+            $html .= '<tr class="' . $tr_classes . '">';
             $html .= '<th scope="row">' . $label . '</th>';
             $html .= '<td>' . $input . '<p class="description">' . $help . '</p></td>';
             $html .= '</tr>';
@@ -370,8 +420,8 @@ class WPUGMapsAutocompleteBox {
         }
 
         /* Preview image for taxonomy */
-        if ($type == 'taxonomy') {
-            $html .= '<tr class="form-field term-group-wrap"><th></th><td>';
+        if ($type == 'taxonomy' || $type == 'user') {
+            $html .= '<tr class="' . $tr_classes . '"><th></th><td>';
             $html .= $this->render_baseimg($base_dim, 'taxonomy');
             $html .= '</td></tr>';
         }
@@ -402,7 +452,8 @@ class WPUGMapsAutocompleteBox {
                     $html .= $input;
                     $html .= '</p>';
                 } else {
-                    $html .= '<tr class="form-field term-group-wrap">';
+
+                    $html .= '<tr class="' . $tr_classes . '">';
                     $html .= '<th scope="row">' . $label . '</th>';
                     $html .= '<td>' . $input . '</td>';
                     $html .= '</tr>';
@@ -424,6 +475,10 @@ class WPUGMapsAutocompleteBox {
             $html .= '</div>';
         }
 
+        if ($type == 'user') {
+            $html .= '</table>';
+        }
+
         return $html;
     }
 
@@ -431,6 +486,8 @@ class WPUGMapsAutocompleteBox {
         $text = '<p>' . $this->apikey_message . '</p>';
         if (!$this->frontapi_key) {
             if ($type == 'taxonomy') {
+                echo '<tr><th></th><td colspan="2">' . $text . '</td></tr>';
+            } elseif ($user == 'taxonomy') {
                 echo '<tr><th></th><td colspan="2">' . $text . '</td></tr>';
             } else {
                 echo $text;
@@ -447,7 +504,7 @@ class WPUGMapsAutocompleteBox {
         if (($this->addaddressfields || $this->addplacefields) && $this->addlatlng) {
             $dimensions = '350x400';
         }
-        if ($type == 'taxonomy') {
+        if ($type == 'taxonomy' || $type == 'user') {
             $dimensions = '600x250';
         }
         if ($base_dim['lat'] || $base_dim['lng']) {
@@ -505,6 +562,38 @@ class WPUGMapsAutocompleteBox {
     /* ----------------------------------------------------------
       Save values
     ---------------------------------------------------------- */
+
+    /* USER */
+
+    public function save_user_values($user_id) {
+        if(!current_user_can('edit_users')){
+            return;
+        }
+
+        // Check nonce
+        if (!isset($_POST['wpugmapsabox_meta_box_nonce']) || !wp_verify_nonce($_POST['wpugmapsabox_meta_box_nonce'], 'wpugmapsabox_save_post_values')) {
+            return;
+        }
+
+        /* Update */
+        $this->dim = apply_filters('wpugmapsautocompletebox_dim', $this->dim);
+        foreach ($this->dim as $id => $dim) {
+            $_dim_id = (isset($dim['id'])) ? $dim['id'] : 'wpugmapsabox_' . $id;
+            if (isset($_POST[$_dim_id])) {
+                switch ($dim['field_type']) {
+                case 'textarea':
+                    update_user_meta($user_id, $_dim_id, sanitize_textarea_field($_POST[$_dim_id]));
+                    break;
+                default:
+                    update_user_meta($user_id, $_dim_id, sanitize_text_field($_POST[$_dim_id]));
+                    break;
+                }
+            }
+        }
+        if (isset($_POST['wpugmapsabox_address'])) {
+            update_user_meta($user_id, 'wpugmapsabox_address', sanitize_text_field($_POST['wpugmapsabox_address']));
+        }
+    }
 
     /* TAXO */
 
@@ -632,7 +721,7 @@ function wpugmapsautocomplete_get_post_address($post_id = false, $args = array()
     $return_value = $args['return_format'];
     preg_match_all('/\{\{([a-z_]+)\}\}/', $args['return_format'], $matches);
     foreach ($matches[1] as $_match) {
-        $meta_value = get_post_meta($post_id, 'wpugmapsabox_'.$_match, 1);
+        $meta_value = get_post_meta($post_id, 'wpugmapsabox_' . $_match, 1);
         $return_value = str_replace('{{' . $_match . '}}', $meta_value, $return_value);
     }
     return $return_value;
