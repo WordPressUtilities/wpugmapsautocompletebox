@@ -726,3 +726,30 @@ function wpugmapsautocomplete_get_post_address($post_id = false, $args = array()
     }
     return $return_value;
 }
+
+/**
+ * Get a user address
+ * @param  int     $post_id     User ID
+ * @param  array   $args        List of arguments
+ * @return string               User address
+ */
+function wpugmapsautocomplete_get_user_address($user_id = false, $args = array()) {
+    if (!$user_id) {
+        return '';
+    }
+    if (!is_array($args)) {
+        $args = array();
+    }
+    if (!isset($args['return_format'])) {
+        $args['return_format'] = '{{street_number}} {{route}}<br />{{postal_code}} {{locality}}';
+    }
+
+    /* Extract values */
+    $return_value = $args['return_format'];
+    preg_match_all('/\{\{([a-z_]+)\}\}/', $args['return_format'], $matches);
+    foreach ($matches[1] as $_match) {
+        $meta_value = get_user_meta($user_id, 'wpugmapsabox_' . $_match, 1);
+        $return_value = str_replace('{{' . $_match . '}}', $meta_value, $return_value);
+    }
+    return $return_value;
+}
