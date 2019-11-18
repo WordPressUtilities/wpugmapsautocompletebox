@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.15.0
+Version: 0.16.0
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,17 +13,21 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.15.0';
+    public $version = '0.16.0';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
     public $static_zoom_level = 14;
     public $cache_dir = '/wpugmapsabox/';
+    public $user_level_usermeta = 'edit_users';
 
     public function __construct() {
         if (!is_admin()) {
             return;
         }
+        add_action('plugins_loaded', array(&$this,
+            'plugins_loaded'
+        ));
         add_action('wp_loaded', array(&$this,
             'wp_loaded'
         ));
@@ -37,6 +41,10 @@ class WPUGMapsAutocompleteBox {
         );
 
         $this->options['admin_url'] = admin_url($this->options['plugin_parent'] . '?page=' . $this->options['plugin_pageslug']);
+    }
+
+    public function plugins_loaded() {
+        $this->user_level_usermeta = apply_filters('wpugmapsautocompletebox_user_level_usermeta', $this->user_level_usermeta);
     }
 
     public function wp_loaded() {
@@ -222,9 +230,15 @@ class WPUGMapsAutocompleteBox {
         }
 
         /* User */
+        add_action('show_user_profile', array(&$this,
+            'add_user_meta_box'
+        ), 10, 1);
         add_action('edit_user_profile', array(&$this,
             'add_user_meta_box'
         ), 10, 1);
+        add_action('personal_options_update', array(&$this,
+            'save_user_values'
+        ));
         add_action('edit_user_profile_update', array(&$this,
             'save_user_values'
         ));
@@ -239,8 +253,9 @@ class WPUGMapsAutocompleteBox {
     }
 
     public function add_custom_meta_boxes($post) {
+        $meta_box_name = apply_filters('wpugmapsautocompletebox_post_meta_box_title', __('Geocoding', 'wpugmapsabox'));
         foreach ($this->post_types as $post_type_box) {
-            add_meta_box('geocoding-metabox', __('Geocoding'), array(&$this,
+            add_meta_box('geocoding-metabox', $meta_box_name, array(&$this,
                 'add_posttype_meta_box'
             ), $post_type_box);
         }
@@ -257,7 +272,7 @@ class WPUGMapsAutocompleteBox {
     public function enqueue_scripts() {
         $currentScreen = get_current_screen();
 
-        if ($currentScreen->base != "post" && $currentScreen->base != "term" && $currentScreen->base != 'user-edit') {
+        if ($currentScreen->base != "post" && $currentScreen->base != "term" && $currentScreen->base != 'user-edit' && $currentScreen->base != 'profile') {
             return;
         }
         if ($currentScreen->base == "post" && !in_array($currentScreen->post_type, $this->post_types)) {
@@ -307,7 +322,7 @@ class WPUGMapsAutocompleteBox {
 
     public function add_user_meta_box($user) {
 
-        if(!current_user_can('edit_users')){
+        if (!current_user_can($this->user_level_usermeta)) {
             return;
         }
 
@@ -388,11 +403,13 @@ class WPUGMapsAutocompleteBox {
         $html = '';
 
         if ($type == 'taxonomy') {
-            $html .= '</table><h2>' . __('Geocoding', 'wpugmapsabox') . '</h2><table class="form-table">';
+            $meta_box_name = apply_filters('wpugmapsautocompletebox_taxo_meta_box_title', __('Geocoding', 'wpugmapsabox'));
+            $html .= '</table><h2>' . $meta_box_name . '</h2><table class="form-table">';
         }
 
         if ($type == 'user') {
-            $html .= '<h3>' . __('Geocoding', 'wpugmapsabox') . '</h3><table class="form-table">';
+            $meta_box_name = apply_filters('wpugmapsautocompletebox_user_meta_box_title', __('Geocoding', 'wpugmapsabox'));
+            $html .= '<h3>' . $meta_box_name . '</h3><table class="form-table">';
         }
 
         $tr_classes = 'form-field';
@@ -566,7 +583,7 @@ class WPUGMapsAutocompleteBox {
     /* USER */
 
     public function save_user_values($user_id) {
-        if(!current_user_can('edit_users')){
+        if (!current_user_can($this->user_level_usermeta)) {
             return;
         }
 
