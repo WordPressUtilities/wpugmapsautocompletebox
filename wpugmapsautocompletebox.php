@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.16.0
+Version: 0.16.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,7 +13,7 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.16.0';
+    public $version = '0.16.1';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
@@ -230,6 +230,9 @@ class WPUGMapsAutocompleteBox {
         }
 
         /* User */
+        add_action('user_new_form', array(&$this,
+            'add_user_meta_box'
+        ), 10, 1);
         add_action('show_user_profile', array(&$this,
             'add_user_meta_box'
         ), 10, 1);
@@ -240,6 +243,9 @@ class WPUGMapsAutocompleteBox {
             'save_user_values'
         ));
         add_action('edit_user_profile_update', array(&$this,
+            'save_user_values'
+        ));
+        add_action('user_register', array(&$this,
             'save_user_values'
         ));
 
@@ -271,8 +277,15 @@ class WPUGMapsAutocompleteBox {
 
     public function enqueue_scripts() {
         $currentScreen = get_current_screen();
+        $authorized_screens = array(
+            'post',
+            'term',
+            'user',
+            'user-edit',
+            'profile'
+        );
 
-        if ($currentScreen->base != "post" && $currentScreen->base != "term" && $currentScreen->base != 'user-edit' && $currentScreen->base != 'profile') {
+        if (!in_array($currentScreen->base, $authorized_screens)) {
             return;
         }
         if ($currentScreen->base == "post" && !in_array($currentScreen->post_type, $this->post_types)) {
