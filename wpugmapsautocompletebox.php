@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.16.1
+Version: 0.16.2
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,7 +13,7 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.16.1';
+    public $version = '0.16.2';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
@@ -67,9 +67,9 @@ class WPUGMapsAutocompleteBox {
         $this->apikey_message = sprintf(__('Please add an <a href="%s" target="_blank">API Key</a> with Google Places API Web Service, Google Maps JavaScript API & Google Static Maps API.', 'wpugmapsabox'), 'https://console.developers.google.com/apis/library?project=_');
         $this->settings_details = array(
             'create_page' => true,
-            'plugin_id' => 'wpugmapsabox',
-            'plugin_name' => 'Maps Autocomplete',
-            'option_id' => 'wpugmapsabox_options',
+            'plugin_id' => $this->options['plugin_id'],
+            'plugin_name' => $this->options['plugin_name'],
+            'option_id' => $this->options['plugin_id'] . '_options',
             'sections' => array(
                 'base' => array(
                     'name' => __('Settings')
@@ -148,6 +148,11 @@ class WPUGMapsAutocompleteBox {
             'lng' => array(
                 'name' => __('Longitude', 'wpugmapsabox'),
                 'type' => 'latlng'
+            ),
+            'zoom' => array(
+                'name' => __('Zoom Level', 'wpugmapsabox'),
+                'type' => 'latlng',
+                'field_type' => 'number'
             ),
             'premise' => array(
                 'name' => __('Premise', 'wpugmapsabox'),
@@ -321,10 +326,11 @@ class WPUGMapsAutocompleteBox {
             return;
         }
         $base_dim = array(
-            'lat' => get_post_meta(get_the_ID(), 'wpugmapsabox_lat', 1),
-            'lng' => get_post_meta(get_the_ID(), 'wpugmapsabox_lng', 1)
+            'lat' => get_post_meta($post_id, 'wpugmapsabox_lat', 1),
+            'lng' => get_post_meta($post_id, 'wpugmapsabox_lng', 1)
         );
-        echo '<div style="max-width:150px">' . $this->render_baseimg($base_dim) . '</div>';
+        $base_image_size = apply_filters('wpugmapsautocompletebox_admin_column_image_size', 150);
+        echo '<div style="max-width:' . $base_image_size . 'px">' . $this->render_baseimg($base_dim) . '</div>';
     }
 
     /* ----------------------------------------------------------
@@ -538,9 +544,13 @@ class WPUGMapsAutocompleteBox {
             $dimensions = '600x250';
         }
         if ($base_dim['lat'] || $base_dim['lng']) {
+            $zoom_level = $this->static_zoom_level;
+            if (isset($base_dim['zoom']) && is_numeric($base_dim['zoom'])) {
+                $zoom_level = $base_dim['zoom'];
+            }
             $coords = $base_dim['lat'] . ',' . $base_dim['lng'];
             $base_img = str_replace('{{coordinates}}', $coords, $this->base_previewurl);
-            $base_img = str_replace('{{zoom}}', $this->static_zoom_level, $base_img);
+            $base_img = str_replace('{{zoom}}', $zoom_level, $base_img);
             $base_img = str_replace('{{dimensions}}', $dimensions, $base_img);
             $base_img = $this->get_static_map_url($base_img);
             $base_img = '<a target="_blank" href="https://maps.google.com/?q=' . $coords . '"><img style="max-width:100%" src="' . $base_img . '" alt="" /></a>';
@@ -612,12 +622,16 @@ class WPUGMapsAutocompleteBox {
             if (isset($_POST[$_dim_id])) {
                 switch ($dim['field_type']) {
                 case 'textarea':
-                    update_user_meta($user_id, $_dim_id, sanitize_textarea_field($_POST[$_dim_id]));
+                    $value = sanitize_textarea_field($_POST[$_dim_id]);
+                    break;
+                case 'number':
+                    $value = preg_replace('/([^0-9])/', '', $_POST[$_dim_id]);
                     break;
                 default:
-                    update_user_meta($user_id, $_dim_id, sanitize_text_field($_POST[$_dim_id]));
+                    $value = sanitize_text_field($_POST[$_dim_id]);
                     break;
                 }
+                update_user_meta($user_id, $_dim_id, $value);
             }
         }
         if (isset($_POST['wpugmapsabox_address'])) {
