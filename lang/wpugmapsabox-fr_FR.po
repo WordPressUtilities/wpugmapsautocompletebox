@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Google Maps Autocomplete Box\n"
-"POT-Creation-Date: 2019-11-20 22:15+0100\n"
+"POT-Creation-Date: 2021-08-25 15:02+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Darklg <darklg.blog@gmail.com>\n"
 "Language-Team: \n"
@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.2.4\n"
+"X-Generator: Poedit 2.4.2\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-KeywordsList: __;_e\n"
@@ -18,7 +18,7 @@ msgstr ""
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:127
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:456
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:463
-#: .././wpugmapsautocompletebox.php:75 .././wpugmapsautocompletebox.php:278
+#: .././wpugmapsautocompletebox.php:75 .././wpugmapsautocompletebox.php:286
 msgid "Settings"
 msgstr "Réglages"
 
@@ -112,39 +112,47 @@ msgid "Locality"
 msgstr "Ville"
 
 #: .././wpugmapsautocompletebox.php:178
+msgid "Administrative area level 2"
+msgstr "Zone administrative niveau 2"
+
+#: .././wpugmapsautocompletebox.php:182
+msgid "Administrative area level 1"
+msgstr "Zone administrative niveau 1"
+
+#: .././wpugmapsautocompletebox.php:186
 msgid "Country"
 msgstr "Pays"
 
-#: .././wpugmapsautocompletebox.php:182
+#: .././wpugmapsautocompletebox.php:190
 msgid "Place Name"
 msgstr "Nom du lieu"
 
-#: .././wpugmapsautocompletebox.php:185
+#: .././wpugmapsautocompletebox.php:193
 msgid "Phone"
 msgstr "Téléphone"
 
-#: .././wpugmapsautocompletebox.php:190
+#: .././wpugmapsautocompletebox.php:198
 msgid "International Phone Number"
 msgstr "Numéro de téléphone international"
 
-#: .././wpugmapsautocompletebox.php:193
+#: .././wpugmapsautocompletebox.php:201
 msgid "Website"
 msgstr "Site web"
 
-#: .././wpugmapsautocompletebox.php:198
+#: .././wpugmapsautocompletebox.php:206
 msgid "Opening Hours"
 msgstr "Heures d'ouverture"
 
-#: .././wpugmapsautocompletebox.php:203
+#: .././wpugmapsautocompletebox.php:211
 msgid "Opening Hours (JSON)"
 msgstr "Heures d’ouverture (JSON)"
 
-#: .././wpugmapsautocompletebox.php:267 .././wpugmapsautocompletebox.php:425
-#: .././wpugmapsautocompletebox.php:430
+#: .././wpugmapsautocompletebox.php:275 .././wpugmapsautocompletebox.php:433
+#: .././wpugmapsautocompletebox.php:438
 msgid "Geocoding"
 msgstr "Géocodage"
 
-#: .././wpugmapsautocompletebox.php:312
+#: .././wpugmapsautocompletebox.php:320
 #, php-format
 msgid ""
 "You need an API Key to use <b>%s</b>. Please fill it in the <a href=\"%s"
@@ -153,11 +161,11 @@ msgstr ""
 "Vous avez besoin d’une clé API pour utiliser <b>%s</b>. Merci de la "
 "spécifier dans <a href=\"%s\">la page d'options</a>."
 
-#: .././wpugmapsautocompletebox.php:440
+#: .././wpugmapsautocompletebox.php:448
 msgid "Address"
 msgstr "Adresse"
 
-#: .././wpugmapsautocompletebox.php:442
+#: .././wpugmapsautocompletebox.php:450
 msgid ""
 "Please write an address below and click on a suggested result to update GPS "
 "coordinates"
