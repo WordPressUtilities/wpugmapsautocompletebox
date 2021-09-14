@@ -174,6 +174,14 @@ class WPUGMapsAutocompleteBox {
                 'name' => __('Locality', 'wpugmapsabox'),
                 'type' => 'addressfields'
             ),
+            'administrative_area_level_2' => array(
+                'name' => __('Administrative area level 2', 'wpugmapsabox'),
+                'type' => 'addressfields'
+            ),
+            'administrative_area_level_1' => array(
+                'name' => __('Administrative area level 1', 'wpugmapsabox'),
+                'type' => 'addressfields'
+            ),
             'country' => array(
                 'name' => __('Country', 'wpugmapsabox'),
                 'type' => 'addressfields'

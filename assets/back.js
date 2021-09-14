@@ -19,7 +19,7 @@ jQuery(document).ready(function() {
     var autocomplete = new google.maps.places.Autocomplete(input);
     var $lat = jQuery('#wpugmapsabox-lat');
     var $lng = jQuery('#wpugmapsabox-lng');
-    var address_fields = ['premise', 'route', 'postal_code', 'country', 'locality', 'street_number'];
+    var address_fields = ['premise', 'route', 'postal_code', 'country', 'locality', 'administrative_area_level_2', 'administrative_area_level_1', 'street_number'];
     var place_fields = {
         'formatted_phone_number': 'phone',
         'website': 'website',
