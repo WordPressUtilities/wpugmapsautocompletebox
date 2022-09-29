@@ -4,7 +4,7 @@
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.17.0
+Version: 0.17.1
 Author: Darklg
 Author URI: https://darklg.me/
 Contributors: CecileBr
@@ -14,7 +14,7 @@ License URI: https://opensource.org/licenses/MIT
 
 class WPUGMapsAutocompleteBox {
 
-    public $version = '0.17.0';
+    public $version = '0.17.1';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
@@ -309,7 +309,7 @@ class WPUGMapsAutocompleteBox {
             return;
         }
 
-        wp_enqueue_script('wpugmapsabox-maps', 'https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=' . $this->frontapi_key . '&language=' . $this->mainlang . '&sensor=false', false, '3.exp', true);
+        wp_enqueue_script('wpugmapsabox-maps', 'https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=' . $this->frontapi_key . '&language=' . $this->mainlang, false, '3.exp', true);
         wp_enqueue_style('wpugmapsabox-backcss', plugins_url('/assets/back.css', __FILE__), array(), $this->version);
         wp_enqueue_script('wpugmapsabox-back', plugins_url('/assets/back.js', __FILE__), array(
             'jquery'
