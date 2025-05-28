@@ -1,20 +1,40 @@
 <?php
+defined('ABSPATH') || die;
 
 /*
 Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
+Update URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.17.1
+Version: 0.18.0
 Author: Darklg
 Author URI: https://darklg.me/
 Contributors: CecileBr
+Text Domain: wpugmapsautocompletebox
+Requires at least: 6.2
+Requires PHP: 8.0
+Network: Optional
 License: MIT License
 License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUGMapsAutocompleteBox {
+    public $plugin_description;
+    public $settings_update;
+    public $messages;
+    public $apikey_message;
+    public $settings_details;
+    public $settings;
+    public $settings_values;
+    public $post_types;
+    public $taxonomies;
+    public $addlatlng;
+    public $addaddressfields;
+    public $addplacefields;
+    public $mainlang;
+    public $frontapi_key;
 
-    public $version = '0.17.1';
+    public $version = '0.18.0';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
@@ -50,18 +70,24 @@ class WPUGMapsAutocompleteBox {
 
     public function wp_loaded() {
 
-        load_plugin_textdomain('wpugmapsabox', false, dirname(plugin_basename(__FILE__)) . '/lang/');
+        $lang_dir = dirname(plugin_basename(__FILE__)) . '/lang/';
+        if (strpos(__DIR__, 'mu-plugins') !== false) {
+            load_muplugin_textdomain('wpugmapsautocompletebox', $lang_dir);
+        } else {
+            load_plugin_textdomain('wpugmapsautocompletebox', false, $lang_dir);
+        }
+        $this->plugin_description = __('Add a Google Maps Autocomplete box on edit post pages.', 'wpugmapsautocompletebox');
         $locale = explode('_', get_locale());
 
         // Base Update
-        include dirname(__FILE__) . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
+        require_once __DIR__ . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
         $this->settings_update = new \wpugmapsabox\WPUBaseUpdate(
             'WordPressUtilities',
             'wpugmapsautocompletebox',
             $this->version);
 
         // Messages
-        include dirname(__FILE__) . '/inc/WPUBaseMessages/WPUBaseMessages.php';
+        require_once __DIR__ . '/inc/WPUBaseMessages/WPUBaseMessages.php';
         $this->messages = new \wpugmapsabox\WPUBaseMessages($this->options['plugin_id']);
 
         // Settings
@@ -99,7 +125,7 @@ class WPUGMapsAutocompleteBox {
             )
         );
 
-        include dirname(__FILE__) . '/inc/WPUBaseSettings/WPUBaseSettings.php';
+        require_once __DIR__ . '/inc/WPUBaseSettings/WPUBaseSettings.php';
         new \wpugmapsabox\WPUBaseSettings($this->settings_details, $this->settings);
 
         $this->settings_values = get_option($this->settings_details['option_id']);
