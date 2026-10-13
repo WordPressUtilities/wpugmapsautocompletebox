@@ -64,7 +64,7 @@
     max-width: 95%;
 }
 
-@media(max-width:782px) {
+@media (max-width:782px) {
     .term-group-wrap .map-preview img {
         max-width: 100%;
     }
@@ -103,7 +103,7 @@
 /* Mobile
 -------------------------- */
 
-@media(max-width:1000px) {
+@media (max-width:1000px) {
     .wpugmapsabox-grid {
         display: flex;
         flex-flow: column;

@@ -1,5 +1,7 @@
 # WPU Google Maps Autocomplete Box
 
+[![PHP workflow](https://github.com/WordPressUtilities/wpugmapsautocompletebox/actions/workflows/php.yml/badge.svg 'PHP workflow')](https://github.com/WordPressUtilities/wpugmapsautocompletebox/actions) [![JS workflow](https://github.com/WordPressUtilities/wpugmapsautocompletebox/actions/workflows/js.yml/badge.svg 'JS workflow')](https://github.com/WordPressUtilities/wpugmapsautocompletebox/actions)
+
 Add a Google Maps Autocomplete box on edit post pages.
 
 ## How to manually add set-up the plugin :

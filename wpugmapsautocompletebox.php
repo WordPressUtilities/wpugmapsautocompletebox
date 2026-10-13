@@ -6,12 +6,12 @@ Plugin Name: WPU Google Maps Autocomplete Box
 Plugin URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Update URI: https://github.com/WordPressUtilities/wpugmapsautocompletebox
 Description: Add a Google Maps Autocomplete box on edit post pages.
-Version: 0.18.0
+Version: 0.19.0
 Author: Darklg
 Author URI: https://darklg.me/
 Contributors: CecileBr
 Text Domain: wpugmapsautocompletebox
-Requires at least: 6.2
+Requires at least: 6.9
 Requires PHP: 8.0
 Network: Optional
 License: MIT License
@@ -34,7 +34,7 @@ class WPUGMapsAutocompleteBox {
     public $mainlang;
     public $frontapi_key;
 
-    public $version = '0.18.0';
+    public $version = '0.19.0';
     public $base_previewurl = '';
     public $dim = array();
     public $options = array();
@@ -72,11 +72,11 @@ class WPUGMapsAutocompleteBox {
 
         $lang_dir = dirname(plugin_basename(__FILE__)) . '/lang/';
         if (strpos(__DIR__, 'mu-plugins') !== false) {
-            load_muplugin_textdomain('wpugmapsautocompletebox', $lang_dir);
+            load_muplugin_textdomain('wpugmapsabox', $lang_dir);
         } else {
-            load_plugin_textdomain('wpugmapsautocompletebox', false, $lang_dir);
+            load_plugin_textdomain('wpugmapsabox', false, $lang_dir);
         }
-        $this->plugin_description = __('Add a Google Maps Autocomplete box on edit post pages.', 'wpugmapsautocompletebox');
+        $this->plugin_description = __('Add a Google Maps Autocomplete box on edit post pages.', 'wpugmapsabox');
         $locale = explode('_', get_locale());
 
         // Base Update
@@ -594,9 +594,6 @@ class WPUGMapsAutocompleteBox {
     }
 
     public function get_static_map_url($base_img) {
-        if (!function_exists('curl_init')) {
-            return $base_img;
-        }
         $img = md5($base_img) . '.png';
         $up_dir = wp_upload_dir();
         $up_dir_maps = $up_dir['basedir'] . $this->cache_dir;
@@ -620,16 +617,17 @@ class WPUGMapsAutocompleteBox {
             return $savepath;
         }
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
-        /* Set referer to check correct permissions for Google APIs */
-        curl_setopt($ch, CURLOPT_REFERER, get_site_url());
-        $raw = curl_exec($ch);
-        curl_close($ch);
+        $response = wp_remote_get($url, array(
+            'headers' => array(
+                /* Set referer to check correct permissions for Google APIs */
+                'Referer' => get_site_url()
+            )
+        ));
+        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) != 200) {
+            return false;
+        }
 
-        file_put_contents($savepath, $raw);
+        file_put_contents($savepath, wp_remote_retrieve_body($response));
 
         return file_exists($savepath);
     }

@@ -1,5 +1,3 @@
-/*global jQuery:false,google:false */
-
 jQuery(document).ready(function() {
     'use strict';
 
